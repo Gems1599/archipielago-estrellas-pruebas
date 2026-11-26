@@ -1,0 +1,8 @@
+.scene-coin-symbol{background:url('assets/interfaz/moneda-estrella.svg') center/contain no-repeat;clip-path:none}
+.world-coin-wallet{position:fixed;right:max(12px,env(safe-area-inset-right));top:90px;z-index:15;display:flex;align-items:center;gap:6px;color:#fff1c5;text-shadow:0 1px 4px #241939;font:11px Georgia,serif;pointer-events:none}.world-coin-wallet strong{display:block;margin-top:3px;font-size:14px}
+.coin-reward-notice{position:fixed;z-index:100;left:50%;top:35%;transform:translateX(-50%);display:flex;align-items:center;flex-direction:column;gap:10px;color:#fff4cc;text-shadow:0 2px 8px #23163c;font:18px Georgia,serif;pointer-events:none;text-align:center;width:min(310px,90vw);animation:coin-notice 2.4s both}.coin-reward-notice img{filter:drop-shadow(0 0 16px #ffdb71);animation:coin-flight 2.2s both}
+@keyframes coin-flight{0%{transform:scale(.5);opacity:0}15%,45%{transform:scale(1);opacity:1}90%,100%{transform:translate(var(--coin-x,25vw),var(--coin-y,-25vh)) scale(.25);opacity:0}}
+@keyframes coin-notice{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}
+@media(max-width:700px){.world-coin-wallet{top:76px;font-size:9px}.world-coin-wallet strong{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.coin-reward-notice,.coin-reward-notice img{animation:none}}
+.reduced .coin-reward-notice,.reduced .coin-reward-notice img{animation:none}

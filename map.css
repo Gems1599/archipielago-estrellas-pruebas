@@ -1,0 +1,80 @@
+.magical-home{max-width:1350px;margin:auto}.map-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 10px}.map-heading h1{font-family:Georgia,serif;font-size:clamp(27px,3vw,42px);color:#60517c;margin:10px 0}.map-heading p{color:#706580}.map-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;font-size:13px}.map-stats>span{background:#fff8e8;border:1px solid #e4d8c3;border-radius:20px;padding:12px}
+.enchanted-map{position:relative;isolation:isolate;height:800px;overflow:hidden;border-radius:40px;border:2px solid #fff6ec;background:radial-gradient(ellipse at 48% 50%,#fff8e6 0%,#f2e8f3 37%,#dce9f3 76%,#cbdfe9 100%);box-shadow:inset 0 0 70px #ffffffb3,0 14px 50px #9b83a322}.enchanted-map:before{content:'';position:absolute;inset:0;z-index:-1;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.3' filter='url(%23n)'/%3E%3C/svg%3E")}.map-cloud{position:absolute;width:240px;height:65px;border-radius:50%;background:#fff9;filter:blur(10px);pointer-events:none}.cloud-one{left:-50px;top:50%}.cloud-two{right:-30px;top:15%}.map-dust{position:absolute;top:47%;left:9%;right:9%;color:#c5a469;font-size:28px;word-spacing:35px;text-align:center;pointer-events:none}
+.luminous-bridges{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.map-bridge{fill:none;stroke:#fff8dd;stroke-width:1.3;stroke-dasharray:1.4 .7;filter:drop-shadow(0 0 5px #d3abd6);opacity:.8}.bridge-lit{stroke:#ffe6a4;filter:drop-shadow(0 0 7px #ecc16d)}.bridge-active{stroke:#f4d28e;stroke-width:1.7;opacity:1;animation:bridge-flow 2s linear infinite}
+.central-castle{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:37%;max-width:430px;text-align:center;pointer-events:none}.central-castle>svg{width:100%;height:auto;filter:drop-shadow(0 6px 9px #ad94bc42)}.central-castle>span{font:italic clamp(11px,1.5vw,17px) Georgia,serif;color:#86708e;display:block;margin-top:-15px}.castle-wing.is-lit{filter:drop-shadow(0 0 6px #ffe0a2)}.castle-complete .central-castle{filter:drop-shadow(0 0 22px #ffe1a5)}
+.map-island{position:absolute;transform:translate(-50%,-50%);width:27%;max-width:275px;min-height:175px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:transparent;padding:0 4px 10px;color:#554968;cursor:pointer;z-index:2;box-shadow:none;font:inherit}.map-island:hover{transform:translate(-50%,-53%);background:transparent;box-shadow:none}.map-island:focus-visible{outline:3px solid #8b72ac;outline-offset:7px;border-radius:30px}.map-island[aria-pressed=true] .island-name{background:#fff7d7;box-shadow:0 0 14px #f5d393}.floating-ground{position:absolute;top:47px;left:0;width:100%;height:100px;z-index:-1;filter:drop-shadow(0 12px 10px #a79bb433)}.island-guardian{display:block;height:100px;transition:transform .25s}.map-island:hover .island-guardian{transform:translateY(-5px)}.island-name{font-family:Georgia,serif;font-size:19px;font-weight:bold;background:#fffaf3e8;border-radius:14px;padding:5px 10px;text-wrap:balance}.island-subject{font-size:12px;background:#ffffffc9;border-radius:10px;padding:3px 7px}.island-progress{font-size:11px;color:#685d78;background:#fffaf2d9;border-radius:10px;padding:3px 7px}.is-complete .floating-ground{filter:drop-shadow(0 0 13px #ffe3a2)}
+.map-traveler{position:absolute;z-index:4;transform:translate(-50%,-90%);pointer-events:none;width:68px;height:100px}.map-traveler>svg{width:100%;height:100%}.is-traveling>svg{animation:traveler-step .28s ease-in-out infinite alternate}.map-status{text-align:center;color:#776188;padding:18px;font-size:14px;min-height:58px}.island-arrival:not(:empty){display:flex;align-items:center;gap:20px;background:#fffcf4;border:1px solid #e4d8e9;border-radius:26px;padding:22px;margin:0 0 20px;box-shadow:0 8px 25px #c2b4c821;scroll-margin:100px}.island-arrival h2{font:24px Georgia,serif;color:#655579}.island-arrival:focus-visible{outline:3px solid #a491bd}.arrival-portrait{flex:none}.map-footer{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding-bottom:25px}.future-map-features{display:flex;gap:14px;width:100%;justify-content:center;flex-wrap:wrap;padding:18px;color:#8a8195;font-size:12px}.future-map-features span{border:1px dashed #d0c5d9;border-radius:15px;padding:10px}
+.castle-celebration{position:absolute;top:60%;left:50%;transform:translateX(-50%);text-align:center;width:60%;pointer-events:none;color:#7d5c88;z-index:5}.castle-celebration span{font: bold 20px Georgia,serif;background:#fff9e9df;padding:8px 12px;border-radius:16px}.castle-celebration p{font-size:12px}.map-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}.map-confetti i{position:absolute;top:-20px;width:8px;height:13px;background:#e2b7c9;border-radius:3px;animation:map-confetti 5s calc(var(--n)*.12s) both}.map-confetti i:nth-child(3n){background:#ecd29a}.map-confetti i:nth-child(3n+1){background:#b8c9e8}
+@keyframes traveler-step{to{transform:translateY(-4px) rotate(2deg)}}@keyframes bridge-flow{to{stroke-dashoffset:-8}}@keyframes map-confetti{to{transform:translate(20px,820px) rotate(380deg);opacity:0}}
+.reduced .enchanted-map *{animation:none!important;transition:none!important}.reduced .map-confetti{display:none}
+@media(prefers-reduced-motion:reduce){.enchanted-map *{animation:none!important;transition:none!important}.map-confetti{display:none}}
+@media(max-width:700px){.map-heading{display:block;padding:10px 0}.map-stats{justify-content:flex-start}.enchanted-map{height:780px;border-radius:24px;margin:0 -8px}.central-castle{width:44%;top:49%}.central-castle>span{font-size:11px;margin-top:-6px}.map-island{width:34%;min-height:170px}.island-name{font-size:14px;padding:4px 6px}.island-subject{font-size:10px;padding:3px}.island-progress{font-size:10px}.floating-ground{height:80px;top:55px}.island-guardian{height:85px}.island-guardian svg{width:85px;height:85px}.map-traveler{width:52px;height:77px}.castle-celebration{top:65%;width:88%}.castle-celebration span{font-size:15px}.castle-celebration p{font-size:11px;margin:8px}.island-arrival:not(:empty){flex-direction:column;text-align:center;gap:0;padding:15px}.arrival-portrait svg{width:105px;height:105px}.island-arrival h2{font-size:22px}}
+@media(max-width:700px){.header{position:static;display:block;padding:12px}.header .brand{margin-bottom:12px}.header .brand b{font-size:15px}.header .topnav{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}.header .topnav button{font-size:12px;padding:9px 11px}.magical-home .map-footer button{max-width:100%}}
+
+/* The original Brot PNG is never cropped or stretched. Nested wrappers keep
+   breathing, greeting and selection reactions independent. */
+.brot-art{display:inline-block;width:var(--brot-size);height:var(--brot-size);max-width:100%;vertical-align:middle;overflow:visible}
+.brot-breathe,.brot-motion{display:flex;align-items:center;justify-content:center;width:100%;height:100%;transform-origin:50% 85%}
+.brot-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(0 3px 3px #64794d26)}
+.brot-breathe{animation:brot-breathe 4s ease-in-out infinite}
+.brot-greeting .brot-motion{animation:brot-greet 1.2s ease-in-out both}
+.brot-reacting .brot-motion{animation:brot-jump .85s ease-in-out both}
+@keyframes brot-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes brot-greet{0%,100%{transform:rotate(0)}30%{transform:rotate(-3deg)}65%{transform:rotate(3deg)}}
+@keyframes brot-jump{0%,100%{transform:translateY(0);filter:drop-shadow(0 0 0 #e2f6a000)}35%{transform:translateY(-13px);filter:drop-shadow(0 0 9px #e2f6a0)}65%{transform:translateY(-5px);filter:drop-shadow(0 0 13px #f8e7a4)}}
+.reduced .brot-art *{animation:none!important}
+@media(prefers-reduced-motion:reduce){.brot-art *{animation:none!important}}
+@media(max-width:700px){.island-guardian .brot-art{width:85px;height:85px}.arrival-portrait .brot-art{width:105px;height:105px}}
+/* Layer coordinates use the original 1312 × 1199 canvas, inside the square slot.
+   Rigid rotations preserve artwork; the reconstructed base covers articulation. */
+.brot-motion{position:relative}
+.brot-rig{display:block;position:relative;width:100%;aspect-ratio:1312/1199;flex:none}
+.brot-art .brot-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:none}
+.brot-layer-ear-left{--ear-angle:-2deg;animation:brot-ear-idle 6.8s ease-in-out infinite}
+.brot-layer-ear-right{--ear-angle:2deg;animation:brot-ear-idle 7.6s .3s ease-in-out infinite}
+.brot-greeting .brot-layer-ear-left,.brot-greeting .brot-layer-ear-right{animation:brot-ear-welcome 1.3s ease-in-out both,brot-ear-idle 7s 1.3s ease-in-out infinite}
+.brot-layer-leaves-head{--leaf-angle:2deg;animation:brot-leaf-sway 5.6s ease-in-out infinite}
+.brot-layer-leaves-tail{--leaf-angle:-1.5deg;animation:brot-leaf-sway 6.8s -.7s ease-in-out infinite}
+.brot-layer-eyes-open{animation:brot-eye-open 6.2s linear infinite}
+.brot-layer-eyes-closed{animation:brot-eye-closed 6.2s linear infinite}
+@keyframes brot-ear-idle{0%,55%,100%{transform:rotate(0)}65%,83%{transform:rotate(var(--ear-angle))}74%{transform:rotate(0)}}
+@keyframes brot-ear-welcome{0%,100%{transform:rotate(0)}25%,65%{transform:rotate(var(--ear-angle))}45%{transform:rotate(0)}}
+@keyframes brot-leaf-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(var(--leaf-angle))}}
+@keyframes brot-eye-open{0%,44%,47%,100%{opacity:1}44.01%,46.99%{opacity:0}}
+@keyframes brot-eye-closed{0%,44%,47%,100%{opacity:0}44.01%,46.99%{opacity:1}}
+/* Pausing animation must leave the eyes open, never both states overlaid. */
+.reduced .brot-layer-eyes-closed{opacity:0}
+@media(prefers-reduced-motion:reduce){.brot-layer-eyes-closed{opacity:0}}
+/* Original guardian illustrations: contain the complete artwork, without
+   clipping highlights, ears, wings, crystals or tails. */
+.guardian-art{position:relative;display:inline-block;width:var(--guardian-size);height:var(--guardian-size);max-width:100%;vertical-align:middle;isolation:isolate;overflow:visible}
+.guardian-hover,.guardian-pose{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform-origin:50% 85%}
+.guardian-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(0 3px 3px #5d537a23)}
+.guardian-ground{position:absolute;left:16%;right:16%;bottom:1%;height:9%;border-radius:50%;background:radial-gradient(ellipse,#796f8f24,transparent 70%);z-index:-1}
+.guardian-aura{position:absolute;inset:5%;z-index:-1;border-radius:50%;opacity:.3;pointer-events:none}
+.guardian-ice .guardian-hover{animation:guardian-hop 5.6s ease-in-out infinite}.guardian-ice .guardian-aura{background:radial-gradient(ellipse,#bcecff,transparent 70%)}
+.guardian-stars .guardian-hover{animation:guardian-float 5.2s ease-in-out infinite}.guardian-stars .guardian-pose{animation:guardian-sway 7s ease-in-out infinite}.guardian-stars .guardian-aura{background:radial-gradient(ellipse,#f0d4f4,transparent 70%)}
+.guardian-water .guardian-hover{animation:guardian-float 5.8s ease-in-out infinite}.guardian-water .guardian-pose{animation:guardian-sway 6.4s ease-in-out infinite}.guardian-water .guardian-aura{background:radial-gradient(ellipse,#a8e8f5,transparent 70%)}
+.guardian-fire .guardian-hover{animation:guardian-float 6.5s ease-in-out infinite}.guardian-fire .guardian-aura{inset:8% -4% 10% 47%;background:radial-gradient(ellipse,#ffce866e,transparent 70%);animation:guardian-firelight 4s ease-in-out infinite}
+.guardian-particles{position:absolute;inset:0;pointer-events:none}
+.guardian-particles i{position:absolute;left:calc(10% + var(--particle)*24%);top:calc(18% + var(--particle)*17%);width:6px;height:6px;opacity:0;animation:guardian-sparkle 4.8s calc(var(--particle)*-.9s) ease-in-out infinite}
+.guardian-ice .guardian-particles i,.guardian-stars .guardian-particles i{background:linear-gradient(transparent 40%,#f9efb4 40% 60%,transparent 60%),linear-gradient(90deg,transparent 40%,#f9efb4 40% 60%,transparent 60%);filter:drop-shadow(0 0 3px #fff2cb)}
+.guardian-ice .guardian-particles i{filter:drop-shadow(0 0 3px #9ce5ff);background:linear-gradient(transparent 40%,#def8ff 40% 60%,transparent 60%),linear-gradient(90deg,transparent 40%,#def8ff 40% 60%,transparent 60%)}
+.guardian-water .guardian-particles i{top:auto;bottom:10%;width:7px;height:7px;border:1px solid #b1dff4;border-radius:50%;box-shadow:inset 1px 1px 1px #fff;animation-name:guardian-bubble}
+.guardian-fire .guardian-particles i{background:#f5cd87;border-radius:50%;width:3px;height:3px;left:calc(52% + var(--particle)*12%);animation-name:guardian-bubble}
+.guardian-reacting .guardian-pose,.guardian-celebrates .guardian-pose{animation:guardian-greet 1s ease-in-out both}
+@keyframes guardian-hop{0%,65%,85%,100%{transform:translateY(0)}74%{transform:translateY(-4px)}}
+@keyframes guardian-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes guardian-sway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+@keyframes guardian-firelight{0%,100%{opacity:.2}50%{opacity:.5}}
+@keyframes guardian-sparkle{0%,65%,100%{opacity:0}78%{opacity:.8}90%{opacity:.2}}
+@keyframes guardian-bubble{0%,20%{opacity:0;transform:translateY(0)}35%{opacity:.7}90%,100%{opacity:0;transform:translateY(-28px)}}
+@keyframes guardian-greet{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(-7px) rotate(-2deg)}65%{transform:translateY(-2px) rotate(2deg)}}
+.reduced .guardian-art *{animation:none!important}.reduced .guardian-particles{display:none}
+@media(prefers-reduced-motion:reduce){.guardian-art *{animation:none!important}.guardian-particles{display:none}}
+@media(max-width:700px){.island-guardian .guardian-art{width:85px;height:85px}.arrival-portrait .guardian-art{width:105px;height:105px}}
+/* Lumi's original is landscape; compensate its silhouette without cropping. */
+.island-guardian .guardian-stars{width:125px}
+.arrival-portrait .guardian-stars{width:165px}
+.companion-slot .guardian-stars{width:145px;max-width:none}
+@media(max-width:700px){.island-guardian .guardian-stars{width:105px}.arrival-portrait .guardian-stars{width:135px}}
