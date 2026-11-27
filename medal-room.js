@@ -3,9 +3,13 @@
 const MEDAL_WORLD_ORDER=['math','english','span','val','nature'];
 const MEDAL_ART_FILES=new Set(["aventurero-valencia.png", "aventurero-castellano.png", "aventurero-english.png", "aventurero-matematicas.png", "aventurero-medi-natural.png", "mundo-conquistado-english.png", "mundo-conquistado-valencia.png", "mundo-conquistado-medi-natural.png", "mundo-conquistado-castellano.png", "mundo-conquistado-matematicas.png", "estrella-semana.png"]); // Original PNGs verified in assets/medallas/inventario.json.
 const MEDAL_SUBJECT_FILES={math:'matematicas',english:'english',span:'castellano',val:'valencia',nature:'medi-natural'};
-let medalToastActive=false;
-function actualCorrect(id){return QUESTIONS[id].filter((_,i)=>st(id).results[i]==='ok').length}
-function actualAttempted(id){return QUESTIONS[id].filter((_,i)=>['ok','miss'].includes(st(id).results[i])).length}
+let medalToastActive=false,medalToastTimer=null;
+function resetMedalCelebrations(){
+ clearTimeout(medalToastTimer);medalToastTimer=null;medalToastActive=false;
+ document.querySelectorAll('.medal-celebration-toast').forEach(notice=>notice.remove());
+}
+function actualCorrect(id){return rewardWorldProgress(id).correct}
+function actualAttempted(id){return rewardWorldProgress(id).answered}
 function realWorldComplete(id){return actualAttempted(id)===QUESTIONS[id].length}
 function medalArchive(){state.medalCollectionV1 ??= {version:1,earned:{}};state.medalCollectionV1.earned ??= {};return state.medalCollectionV1}
 function medalCatalog(){
@@ -58,13 +62,13 @@ function openMedalDetails(id){
  showModal(esc(medal.name),`<div class="medal-detail-art ${record?'medal-obtained':'medal-pending'}">${medalPicture(medal)}</div><p>${esc(medal.description)}</p><p><strong>Estado: ${record?'Conseguida':'Pendiente'}</strong></p><p>${esc(progress)}</p>${record?`<p>${esc(medalDate(record.earnedAt))}</p>${record.source==='legacy'?'<p>Conservada de tus medallas anteriores.</p>':''}`:''}${medal.weekLabel?`<p>${esc(medal.weekLabel)} · una única Estrella para esta semana.</p>`:''}`,'');
 }
 function celebratePendingMedals(){
- if(medalToastActive)return;
+ if(!classroomReady||medalToastActive||document.querySelector('.sticker-celebration'))return;
  const records=Object.values(medalArchive().earned).filter(r=>r.celebrationPending);if(!records.length)return;
  const notice=document.createElement('aside');notice.className='medal-celebration-toast';notice.setAttribute('role','status');
  notice.innerHTML=`<strong>${records.length===1?'¡Una nueva medalla!':'¡'+records.length+' nuevas medallas!'}</strong><p>${records.map(r=>esc(r.name)).join('<br>')}</p><button data-medal-toast-open>Ver colección</button><button data-medal-toast-close aria-label="Cerrar celebración">Cerrar</button>`;
  document.body.append(notice);medalToastActive=true;
  for(const record of records)record.celebrationPending=false;save();
- let closed=false;const close=()=>{if(closed)return;closed=true;notice.remove();medalToastActive=false;queueMicrotask(celebratePendingMedals)};
+ let closed=false;const close=()=>{if(closed)return;closed=true;resetMedalCelebrations();queueMicrotask(celebrateNewStickers);queueMicrotask(celebratePendingMedals)};
  notice.querySelector('[data-medal-toast-open]').onclick=()=>{close();go('medals')};notice.querySelector('[data-medal-toast-close]').onclick=close;
- setTimeout(close,8000);
+ medalToastTimer=setTimeout(close,8000);
 }

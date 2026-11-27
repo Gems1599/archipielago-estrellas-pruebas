@@ -4,7 +4,7 @@ let classroomUserId=null,classroomRevision=0,classroomReady=false,classroomFaile
 function classroomStatus(message,error=false){let el=document.getElementById('cloud-status');if(!el){el=document.createElement('div');el.id='cloud-status';el.setAttribute('role','status');document.body.append(el)}el.className='cloud-status'+(error?' cloud-error':'');el.textContent=message}
 function classroomResetView(){
  destroyWeeklyWorld();classroomWorldContentEnabled=false;weeklyProgressByWorld.clear();
- destroyMagicMissions();resetStickerCelebrations();
+ destroyMagicMissions();resetStickerCelebrations();resetMedalCelebrations();
  resetMagicShop();
  clearTimeout(classroomTimer);stopTimer();cancelMapJourney();document.getElementById('app').inert=false;classroomReady=false;classroomFailed=false;classroomDirty=false;classroomBusy=false;classroomUserId=null;classroomRevision=0;classroomSavedSnapshot=null;classroomPendingSave=null;
  screen='home';active='math';review=false;feedback=null;selection='';pairState={};classState={};showHint=false;paused=false;expired=false;noTime=false;modal=null;recentUnlocks=[];

@@ -6,13 +6,21 @@ function recordWeeklyProgress({world:id,answered,correct}){
  if(!world(id)||!Number.isInteger(answered)||!Number.isInteger(correct)||correct<0||answered<correct||answered>30)return;
  const previous=weeklyProgressByWorld.get(id);
  // One confirmed run per world counts on the map; versions and retries never add stars together.
- if(!previous||correct>previous.correct||(correct===previous.correct&&answered>previous.answered)){
-  weeklyProgressByWorld.set(id,{answered,correct});
- }
+ const best=!previous||correct>previous.correct||(correct===previous.correct&&answered>previous.answered)
+  ? {answered,correct}:previous;
+ weeklyProgressByWorld.set(id,{...best,maxAnswered:Math.max(answered,previous?.maxAnswered??0)});
 }
 function mapWorldProgress(id){
  const legacy={answered:attempted(id),correct:correctCount(id)};
  return (classroomWorldContentEnabled&&weeklyProgressByWorld.get(id))||legacy;
+}
+function rewardWorldProgress(id){
+ const results=QUESTIONS[id].map((_,i)=>st(id).results[i]);
+ const weekly=classroomWorldContentEnabled?weeklyProgressByWorld.get(id):null;
+ return {
+  answered:Math.max(results.filter(result=>result==='ok'||result==='miss').length,weekly?.maxAnswered??0),
+  correct:Math.max(results.filter(result=>result==='ok').length,weekly?.correct??0)
+ };
 }
 function destroyWeeklyWorld(){weeklyWorldView?.destroy();weeklyWorldView=null;}
 async function openWeeklyWorld(worldId){
@@ -31,10 +39,18 @@ async function openWeeklyWorld(worldId){
  const client=WorldContentIntegration.worldContentStudentClient(request,{enabled:true});
  const button=(text,action,attrs='')=>`<button type="button" data-weekly="${action}" ${attrs}>${esc(text)}</button>`;
  function layout(body){if(!valid())return;clearInterval(clock);host.innerHTML=`<div class="mission-shell"><nav class="mission-navigation">${button('Volver al mapa','home')}<span>${state.futureFeatures.currency.balance} monedas estrella</span></nav><div class="mission-content">${body}</div><p role="status" class="weekly-status"></p></div>`;host.onclick=e=>{const b=e.target.closest('[data-weekly]');if(b&&!b.disabled)void action(b.dataset.weekly,b)};host.oninput=host.onchange=null;}
- function accept(data){run=data.run;active=worldId=run.world;syncWorldScene();
+ function accept(data,mode='migration'){run=data.run;active=worldId=run.world;syncWorldScene();
   const results=Object.values(run.results);
   recordWeeklyProgress({world:run.world,answered:results.length,correct:results.filter(result=>result==='ok').length});
-  missionGameWallet(data.wallet);if(data.legacyWorld){classroomRevision=data.gameRevision;state.worlds[run.world]=structuredClone(data.legacyWorld);checkAwards();reconcileStickers('gameplay');save();}}
+  missionGameWallet(data.wallet);
+  if(data.legacyWorld){
+   classroomRevision=data.gameRevision;
+   state.worlds[run.world]=structuredClone(data.legacyWorld);
+  }
+  reconcileStickers(mode);
+  if(data.legacyWorld){checkAwards();save()}
+  else reconcileMedalCollection(mode);
+ }
  function status(message){const el=host.querySelector('.weekly-status');if(el)el.textContent=message;}
  function route(){dirty=false;feedback=null;layout(`<div class="mission-intro">${MagicMissions.guardian(worldId)}<div><h1>${esc(world(worldId).name)}</h1><p>${esc(run.weekName)} · Versión conservada</p><p>${Object.keys(run.results).length}/30 respondidas · ${Object.values(run.results).filter(x=>x==='ok').length}/30 correctas</p></div></div><div class="content-route">${run.questions.map((q,i)=>button((i+1)+' · '+(run.results[q.id]==='ok'?'⭐':run.results[q.id]==='miss'?'Repasar':'Pendiente'),'question',`data-index="${i}" ${i>(run.progress.index||0)&&!run.results[q.id]?'disabled':''}`)).join('')}</div>${button('Continuar recorrido','continue')}${button('Repasar errores','review')}${button('Consultar preguntas disponibles','refresh')}${button('Recorridos anteriores','history')}`);}
  function input(q){
@@ -63,7 +79,7 @@ async function openWeeklyWorld(worldId){
    // Capture the game revision only after pending collection/avatar saves
    // complete. The transport used to wait after constructing this payload.
    await waitForGameSave();
-   pending??={revision:run.revision,gameRevision:classroomRevision,requestId:crypto.randomUUID()};const data=await client.answer(run,run.questions[index].id,value,pending);accept(data);feedback=data.feedback;dirty=false;pending=null;clockStarted=Date.now();question(false);return;
+   pending??={revision:run.revision,gameRevision:classroomRevision,requestId:crypto.randomUUID()};const data=await client.answer(run,run.questions[index].id,value,pending);accept(data,'gameplay');feedback=data.feedback;dirty=false;pending=null;clockStarted=Date.now();question(false);return;
   }
  }catch(e){if(valid())status(e.message+' La operación no está confirmada.')}finally{busy=false;if(valid())host.inert=false}}
  const unload=e=>{if(dirty||busy){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',unload);

@@ -1,5 +1,5 @@
 /* Permanent, additive collection. Pending Week 1 cards are now visible by request. */
-let stickerCelebrationQueue=[];
+let stickerCelebrationQueue=[],stickerToastTimer=null;
 let albumPage=0;
 const albumMobile=window.matchMedia('(max-width:700px)');
 albumMobile.addEventListener('change',()=>{if(screen==='album'){albumPage=0;renderStickerAlbum()}});
@@ -8,7 +8,7 @@ function stickerEligible(card){
  const week=STICKER_WEEKS.find(w=>w.id===card.week);
  // This evaluator covers only the original Week 1. Future weeks require their own dated evidence.
  if(!week?.enabled||week.id!=='week-1')return false;
- const done=id=>QUESTIONS[id].every((_,i)=>st(id).results[i]==='ok');
+ const done=id=>rewardWorldProgress(id).correct===QUESTIONS[id].length;
  if(card.condition==='correct-original-world-v1'&&WORLDS.some(w=>w.id===card.world))return done(card.world);
  if(card.condition==='correct-original-five-worlds-v1')return WORLDS.every(w=>done(w.id));
  return false;
@@ -44,13 +44,15 @@ function renderAlbumCard(c){
 }
 function openStickerRequirement(id){const c=albumCards().find(c=>c.id===id&&!c.owned);if(!c)return;showModal(esc(c.name),`<p>${esc(stickerRequirement(c))}</p><p>Este cromo todavía está pendiente.</p>`,'')}
 function celebrateNewStickers(){
- const ids=[...new Set(stickerCelebrationQueue)];stickerCelebrationQueue=[];if(!ids.length||!classroomReady)return;
+ if(!classroomReady||medalToastActive||document.querySelector('.sticker-celebration'))return;
+ const ids=[...new Set(stickerCelebrationQueue)];stickerCelebrationQueue=[];if(!ids.length)return;
  const notice=document.createElement('aside');notice.className='sticker-celebration';notice.setAttribute('role','status');
  const title=document.createElement('strong');title.textContent=ids.length===1?'¡Nuevo cromo conseguido!':'¡Nuevos cromos conseguidos!';
  const text=document.createElement('span');text.textContent=ids.map(id=>STICKER_CATALOG.find(c=>c.id===id)?.name||'Recuerdo de tu aventura').join(' · ');
- const open=document.createElement('button');open.textContent='Ver mi álbum';open.onclick=()=>{notice.remove();go('album')};const close=document.createElement('button');close.textContent='Cerrar';close.onclick=()=>notice.remove();notice.append(title,text,open,close);document.body.append(notice);setTimeout(()=>notice.remove(),9000);
+ const dismiss=()=>{clearTimeout(stickerToastTimer);stickerToastTimer=null;notice.remove();queueMicrotask(celebratePendingMedals);queueMicrotask(celebrateNewStickers);};
+ const open=document.createElement('button');open.textContent='Ver mi álbum';open.onclick=()=>{dismiss();go('album')};const close=document.createElement('button');close.textContent='Cerrar';close.onclick=dismiss;notice.append(title,text,open,close);document.body.append(notice);stickerToastTimer=setTimeout(dismiss,9000);
 }
-function resetStickerCelebrations(){stickerCelebrationQueue=[];document.querySelectorAll('.sticker-celebration').forEach(e=>e.remove())}
+function resetStickerCelebrations(){clearTimeout(stickerToastTimer);stickerToastTimer=null;stickerCelebrationQueue=[];document.querySelectorAll('.sticker-celebration').forEach(e=>e.remove())}
 
 function turnAlbum(direction){const step=albumMobile.matches?1:2,leaves=albumLeaves();albumPage=Math.max(0,Math.min(Math.max(0,Math.floor((leaves.length-1)/step)*step),albumPage+direction*step));renderStickerAlbum();document.querySelector('.sticker-book')?.classList.add('album-turning')}
 function renderStickerAlbum(){
