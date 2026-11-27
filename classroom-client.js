@@ -3,7 +3,7 @@
 let classroomUserId=null,classroomRevision=0,classroomReady=false,classroomFailed=false,classroomTimer=null,classroomBusy=false,classroomDirty=false,classroomEpoch=0,classroomSavedSnapshot=null,classroomPendingSave=null;
 function classroomStatus(message,error=false){let el=document.getElementById('cloud-status');if(!el){el=document.createElement('div');el.id='cloud-status';el.setAttribute('role','status');document.body.append(el)}el.className='cloud-status'+(error?' cloud-error':'');el.textContent=message}
 function classroomResetView(){
- destroyWeeklyWorld();classroomWorldContentEnabled=false;
+ destroyWeeklyWorld();classroomWorldContentEnabled=false;weeklyProgressByWorld.clear();
  destroyMagicMissions();resetStickerCelebrations();
  resetMagicShop();
  clearTimeout(classroomTimer);stopTimer();cancelMapJourney();document.getElementById('app').inert=false;classroomReady=false;classroomFailed=false;classroomDirty=false;classroomBusy=false;classroomUserId=null;classroomRevision=0;classroomSavedSnapshot=null;classroomPendingSave=null;
@@ -25,12 +25,25 @@ async function classroomConnect(user){
   if(epoch!==classroomEpoch)return;
   if(checked.student?.id!==user.id||loaded.student?.id!==user.id)throw new Error('La sesión cambió durante el acceso.');
   if(!Number.isSafeInteger(loaded.revision)||loaded.revision<0||(loaded.state===null&&loaded.revision!==0)||(loaded.state!==null&&(!loaded.state||typeof loaded.state!=='object'||Array.isArray(loaded.state))))throw new Error('La partida necesita revisión. No se ha sobrescrito.');
+  let weeklyProgressUnavailable=false;
+  if(checked.worldContentEnabled===true&&loaded.state?.futureFeatures?.currency){
+   try{
+    const history=await StudentAccess.request('/world-content/history',{expectedStudentId:user.id});
+    if(epoch!==classroomEpoch)return;
+    if(!Array.isArray(history.runs))throw new Error('Historial semanal inválido.');
+    history.runs.forEach(recordWeeklyProgress);
+   }catch{
+    if(epoch!==classroomEpoch)return;
+    weeklyProgressUnavailable=true;
+   }
+  }
   classroomWorldContentEnabled=checked.worldContentEnabled===true;prepareClassroomState(loaded.state||{});classroomUserId=user.id;classroomRevision=loaded.revision;classroomReady=true;
   if(loaded.state===null)state.avatarName=user.nickname;document.body.classList.toggle('reduced',!state.motion);document.body.classList.remove('classroom-gate');
   classroomSavedSnapshot=loaded.state===null?null:JSON.stringify(loaded.state);
   reconcileMedalCollection('migration');reconcileStarCoins();reconcileStickers();save();render();
   const logout=document.createElement('button');logout.className='cloud-logout';logout.textContent='Cerrar sesión';logout.onclick=()=>classroomLogout();document.body.append(logout);
   classroomStatus('Partida de '+user.nickname+(classroomDirty?' · preparando guardado online':' · recuperada online'));
+  if(weeklyProgressUnavailable)showModal('Progreso semanal pendiente de cargar','Abre un mundo para recuperar su recorrido guardado o vuelve a iniciar sesión para consultar todos los mundos.','🌟');
   announceMagicMissions();
  }catch(e){if(epoch===classroomEpoch){StudentAccess.forget();classroomBoot(e.message)}throw e}
 }

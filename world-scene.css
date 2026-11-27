@@ -47,3 +47,8 @@ body.illustrated-world:before{content:'';position:fixed;inset:0;background:var(-
 
 .world-question-journey{top:115px}
 .illustrated-world-question .question-grid{padding-top:165px}
+
+.weekly-world{background:transparent}
+.weekly-world .mission-shell{background:linear-gradient(#14213f66,#152341ab)}
+.weekly-world .mission-navigation{flex-wrap:wrap;gap:12px}
+.weekly-world .mission-content{max-width:960px;margin-inline:auto}

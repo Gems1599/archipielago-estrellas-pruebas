@@ -13,7 +13,7 @@ const WORLD_THEME_VALUES={
 };
 const worldActorPosition={};
 function syncWorldScene(){
- const enabled=Boolean(WORLD_SCENES[active])&&(screen==='world'||screen==='question');
+ const enabled=Boolean(WORLD_SCENES[active])&&(screen==='world'||screen==='question'||screen==='weekly-world');
  document.body.classList.toggle('illustrated-world',enabled);
  document.body.classList.toggle('illustrated-world-question',enabled&&screen==='question');
  for(const key of WORLD_THEME_KEYS)document.body.style.removeProperty('--world-'+key);

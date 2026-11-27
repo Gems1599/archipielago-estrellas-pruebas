@@ -1,10 +1,23 @@
 /* Main-game weekly world view. Questions are public; grading/persistence belong
    to the authenticated server. Existing original rewards remain separate. */
 let weeklyWorldView=null,classroomWorldContentEnabled=false;
+const weeklyProgressByWorld=new Map();
+function recordWeeklyProgress({world:id,answered,correct}){
+ if(!world(id)||!Number.isInteger(answered)||!Number.isInteger(correct)||correct<0||answered<correct||answered>30)return;
+ const previous=weeklyProgressByWorld.get(id);
+ // One confirmed run per world counts on the map; versions and retries never add stars together.
+ if(!previous||correct>previous.correct||(correct===previous.correct&&answered>previous.answered)){
+  weeklyProgressByWorld.set(id,{answered,correct});
+ }
+}
+function mapWorldProgress(id){
+ const legacy={answered:attempted(id),correct:correctCount(id)};
+ return (classroomWorldContentEnabled&&weeklyProgressByWorld.get(id))||legacy;
+}
 function destroyWeeklyWorld(){weeklyWorldView?.destroy();weeklyWorldView=null;}
 async function openWeeklyWorld(worldId){
  destroyWeeklyWorld();const epoch=classroomEpoch,owner=classroomUserId;
- go('weekly-world');active=worldId;setApp('<section class="magic-missions" id="weekly-world-host"></section>');
+ active=worldId;go('weekly-world');setApp('<section class="magic-missions weekly-world" id="weekly-world-host"></section>');
  const host=document.getElementById('weekly-world-host');let alive=true,run=null,index=0,value='',feedback=null,busy=false,dirty=false,pending=null,clock=null,clockStarted=Date.now();
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const valid=()=>alive&&epoch===classroomEpoch&&owner===classroomUserId;
@@ -17,8 +30,11 @@ async function openWeeklyWorld(worldId){
  };
  const client=WorldContentIntegration.worldContentStudentClient(request,{enabled:true});
  const button=(text,action,attrs='')=>`<button type="button" data-weekly="${action}" ${attrs}>${esc(text)}</button>`;
- function layout(body){if(!valid())return;clearInterval(clock);host.innerHTML=`<div class="mission-shell"><nav class="mission-navigation">${button('Inicio','home')}<span>${state.futureFeatures.currency.balance} monedas estrella</span></nav><div class="mission-content">${body}</div><p role="status" class="weekly-status"></p></div>`;host.onclick=e=>{const b=e.target.closest('[data-weekly]');if(b&&!b.disabled)void action(b.dataset.weekly,b)};host.oninput=host.onchange=null;}
- function accept(data){run=data.run;active=worldId=run.world;missionGameWallet(data.wallet);if(data.legacyWorld){classroomRevision=data.gameRevision;state.worlds[run.world]=structuredClone(data.legacyWorld);checkAwards();reconcileStickers('gameplay');save();}}
+ function layout(body){if(!valid())return;clearInterval(clock);host.innerHTML=`<div class="mission-shell"><nav class="mission-navigation">${button('Volver al mapa','home')}<span>${state.futureFeatures.currency.balance} monedas estrella</span></nav><div class="mission-content">${body}</div><p role="status" class="weekly-status"></p></div>`;host.onclick=e=>{const b=e.target.closest('[data-weekly]');if(b&&!b.disabled)void action(b.dataset.weekly,b)};host.oninput=host.onchange=null;}
+ function accept(data){run=data.run;active=worldId=run.world;syncWorldScene();
+  const results=Object.values(run.results);
+  recordWeeklyProgress({world:run.world,answered:results.length,correct:results.filter(result=>result==='ok').length});
+  missionGameWallet(data.wallet);if(data.legacyWorld){classroomRevision=data.gameRevision;state.worlds[run.world]=structuredClone(data.legacyWorld);checkAwards();reconcileStickers('gameplay');save();}}
  function status(message){const el=host.querySelector('.weekly-status');if(el)el.textContent=message;}
  function route(){dirty=false;feedback=null;layout(`<div class="mission-intro">${MagicMissions.guardian(worldId)}<div><h1>${esc(world(worldId).name)}</h1><p>${esc(run.weekName)} · Versión conservada</p><p>${Object.keys(run.results).length}/30 respondidas · ${Object.values(run.results).filter(x=>x==='ok').length}/30 correctas</p></div></div><div class="content-route">${run.questions.map((q,i)=>button((i+1)+' · '+(run.results[q.id]==='ok'?'⭐':run.results[q.id]==='miss'?'Repasar':'Pendiente'),'question',`data-index="${i}" ${i>(run.progress.index||0)&&!run.results[q.id]?'disabled':''}`)).join('')}</div>${button('Continuar recorrido','continue')}${button('Repasar errores','review')}${button('Consultar preguntas disponibles','refresh')}${button('Recorridos anteriores','history')}`);}
  function input(q){

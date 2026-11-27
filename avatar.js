@@ -58,7 +58,7 @@ function chooseCharacter(key,value){
  state.avatar=a;save();renderAvatarScreen();
  const selected=document.querySelector(`[data-option="${key}:${value}"]`);if(selected)selected.focus({preventScroll:true});
 }
-function updateAvatarName(v){state.avatarName=v.trim()||'Vera';save();document.querySelectorAll('[data-character-name]').forEach(e=>e.textContent=state.avatarName)}
+function updateAvatarName(v){state.avatarName=v.trim()||'Explorador';save();document.querySelectorAll('[data-character-name]').forEach(e=>e.textContent=state.avatarName)}
 let wardrobeTab='traits';
 const WARDROBE_ACCESSORY_ART=new Set(); // Activate only original accessory PNGs supplied by the owner.
 const WARDROBE_ACCESSORY_FILES={star:'broche-estelar.png',flower:'flor-del-bosque.png',book:'libro-aventuras.png'};
