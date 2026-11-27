@@ -45,7 +45,7 @@ async function classroomConnect(user){
   classroomStatus('Partida de '+user.nickname+(classroomDirty?' · preparando guardado online':' · recuperada online'));
   if(weeklyProgressUnavailable)showModal('Progreso semanal pendiente de cargar','Abre un mundo para recuperar su recorrido guardado o vuelve a iniciar sesión para consultar todos los mundos.','🌟');
   announceMagicMissions();
- }catch(e){if(epoch===classroomEpoch){StudentAccess.forget();classroomBoot(e.message)}throw e}
+ }catch(e){if(epoch===classroomEpoch){StudentAccess.forget();if(classroomReady)classroomBoot(e.message)}throw e}
 }
 function classroomScheduleSave(){if(!classroomReady||classroomFailed)return false;if(!classroomBusy&&!classroomDirty&&JSON.stringify(state)===classroomSavedSnapshot)return true;classroomDirty=true;classroomStatus('Guardando partida…');clearTimeout(classroomTimer);classroomTimer=setTimeout(classroomFlush,300);return true}
 function classroomSaveFailure(error){
@@ -69,7 +69,8 @@ async function classroomFlush(){
 async function classroomLogout(force=false){
  if(!force){try{await magicMissionView?.flush();await weeklyWorldView?.flush()}catch(e){classroomStatus('No se ha cerrado la sesión: hay respuestas de la actividad pendientes. '+e.message,true);return}while(classroomBusy||classroomDirty){if(classroomFailed)return;await classroomFlush();await new Promise(r=>setTimeout(r,40))}if(classroomFailed)return}
  const epoch=++classroomEpoch;clearTimeout(classroomTimer);classroomReady=false;
- document.getElementById('app').textContent='Cerrando sesión…';prepareClassroomState({});
+ classroomResetView();prepareClassroomState({});
+ StudentAccess.showLoading(document.getElementById('app'),'Cerrando sesión…');
  let warning='';try{await StudentAccess.logout()}catch{warning='Sesión eliminada de esta pestaña. No se pudo confirmar su revocación en el servidor.'}
  if(epoch===classroomEpoch)classroomBoot(warning);
 }

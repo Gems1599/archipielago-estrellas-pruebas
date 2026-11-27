@@ -11,8 +11,8 @@ const GIRL_LAYER_HAIR=[
  {id:'none',label:'Sin pelo',file:null}
 ];
 function usesIllustratedGirl(){return state.illustratedAvatarV1?.enabled===true&&['girl-original-v1','girl-layered-v1'].includes(state.illustratedAvatarV1.template)}
-function layeredGirlSelection(){
- const saved=state.illustratedAvatarV1||{},choice=(key,fallback)=>GIRL_PALETTE[key].some(x=>x[0]===saved[key])?saved[key]:fallback;
+function layeredGirlSelection(saved=state.illustratedAvatarV1||{}){
+ const choice=(key,fallback)=>GIRL_PALETTE[key].some(x=>x[0]===saved[key])?saved[key]:fallback;
  return {hair:GIRL_LAYER_HAIR.some(h=>h.id===saved.hair)?saved.hair:'waves',clothes:saved.clothes==='outfit-blue'?'outfit-blue':'base',hairColor:choice('hairColor','brown'),eyes:choice('eyes','brown'),skin:choice('skin','original')};
 }
 function normalizeIllustratedAvatar(){
@@ -20,9 +20,9 @@ function normalizeIllustratedAvatar(){
  // Keep clothing, colours, enabled state, the classic avatar and unknown fields.
  if(state.illustratedAvatarV1&&['braids','bun'].includes(state.illustratedAvatarV1.hair))state.illustratedAvatarV1.hair='waves';
 }
-function girlComposition(selection,equipment=shopEquipment()){
+function girlComposition(selection,equipment=shopEquipment(),inlineTint=true){
  const hair=GIRL_LAYER_HAIR.find(h=>h.id===selection.hair)||GIRL_LAYER_HAIR[2];
- const colour=`data-skin="${selection.skin}" data-eyes="${selection.eyes}" data-hair-color="${selection.hairColor}" onload="tintGirlLayer(this)"`;
+ const colour=`data-skin="${selection.skin}" data-eyes="${selection.eyes}" data-hair-color="${selection.hairColor}"${inlineTint?' onload="tintGirlLayer(this)"':''}`;
  return `<span class="girl-layer-group">${shopEquipmentArt(equipment,['wings','back'],'behind')}<img data-girl-layer="base" ${colour} src="${GIRL_LAYER_BASE}" alt="" width="1024" height="1536" draggable="false">${selection.clothes==='outfit-blue'&&!equipment.outfit&&!equipment.top&&!equipment.bottom?'<img data-girl-layer="clothes" src="assets/avatar/capas/nina-v1/pruebas/vestido-azul.png" alt="" width="1024" height="1536" draggable="false">':''}${shopEquipmentArt(equipment,['outfit','bottom','top','feet','jacket','back','neck'])}${hair.file?`<img data-girl-layer="hair" data-hair-id="${hair.id}" ${colour} src="${hair.file}" alt="" width="1024" height="1536" draggable="false">`:''}${shopEquipmentArt(equipment,['head','face','hand'])}</span>`;
 }
 function renderAvatar(scale=1,appearance=state.avatar){

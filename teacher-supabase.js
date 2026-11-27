@@ -10,7 +10,7 @@ function status(text){$('teacher-status').textContent=text}
 function error(text){$('teacher-error').textContent=text}
 function visible(id,show){$(id).hidden=!show}
 function clearQr(){if(qrUrl)URL.revokeObjectURL(qrUrl);qrUrl=null;$('totp-qr').removeAttribute('src');$('totp-secret').value='';visible('qr-section',false)}
-function clearPrivate(){worldContentPanel?.destroy();worldContentPanel=null;$('teacher-world-content').replaceChildren();visible('teacher-world-content',false);missionPanel?.destroy();missionPanel=null;$('teacher-missions').replaceChildren();visible('teacher-missions',false);missionStudents=[];session=null;factorId=null;teacherAllowed=false;pendingImport=null;verifiedFactors=[];pendingFactors=[];clearQr();$('teacher-password').value='';$('totp-code').value='';$('issued-code').textContent='';$('secure-students').replaceChildren();$('import-target').replaceChildren();$('secure-import-preview').textContent='';$('import-json').value='';$('import-nickname').value='';visible('secure-import-confirm',false);visible('secure-panel',false);visible('mfa-section',false)}
+function clearPrivate(){TeacherStudents.close();$('new-student').reset();worldContentPanel?.destroy();worldContentPanel=null;$('teacher-world-content').replaceChildren();visible('teacher-world-content',false);missionPanel?.destroy();missionPanel=null;$('teacher-missions').replaceChildren();visible('teacher-missions',false);missionStudents=[];session=null;factorId=null;teacherAllowed=false;pendingImport=null;verifiedFactors=[];pendingFactors=[];clearQr();$('teacher-password').value='';$('totp-code').value='';$('issued-code').textContent='';$('secure-students').replaceChildren();$('import-target').replaceChildren();$('secure-import-preview').textContent='';$('import-json').value='';$('import-nickname').value='';visible('secure-import-confirm',false);visible('secure-panel',false);visible('mfa-section',false)}
 function parseConfig(url,key){
  let u;try{u=new URL(url.trim())}catch{throw new Error('Copia la URL HTTPS de tu proyecto Supabase.')}if(u.protocol!=='https:'||!/^[-a-z0-9]+\.supabase\.co$/.test(u.hostname)||u.port||u.username||u.password||u.search||u.hash||!['','/'].includes(u.pathname))throw new Error('Copia la URL HTTPS de tu proyecto Supabase, sin rutas adicionales.');
  if(fixedProject&&u.origin!==fixedProject)throw new Error('Este panel solo admite el proyecto de pruebas.');
@@ -57,9 +57,15 @@ async function authorizePanel(){
 }
 async function loadStudents(){
  const data=await edge('/students');missionStudents=data.students||[];$('secure-students').replaceChildren();$('import-target').replaceChildren();
- for(const s of data.students||[]){const row=document.createElement('tr');const values=[s.nickname,s.lastAccess?new Date(s.lastAccess).toLocaleString('es-ES'):'Sin accesos',Object.entries(s.progress?.worlds||{}).map(([id,p])=>id+': '+p.phases+' fases · '+p.correct+' aciertos').join('\n'),s.progress?.coins||0,'Medallas: '+(s.progress?.medals?.join(', ')||'ninguna')+'\nCromos: '+(s.progress?.stickers?.join(', ')||'ninguno')];
-  for(const value of values){const cell=document.createElement('td');cell.textContent=String(value);row.append(cell)}const cell=document.createElement('td'),reset=document.createElement('button');reset.textContent='Restablecer '+s.nickname;reset.addEventListener('click',()=>run(async()=>{if(!teacherAllowed||!confirm('¿Restablecer el código de '+s.nickname+'? Sus sesiones anteriores dejarán de funcionar.'))return;const result=await edge('/students/'+encodeURIComponent(s.id)+'/reset',{method:'POST',body:{}});$('issued-code').textContent=s.nickname+' · nuevo código: '+result.code;}));cell.append(reset);row.append(cell);$('secure-students').append(row);
-  if(!s.hasSave){const option=document.createElement('option');option.value=s.id;option.textContent=s.nickname;$('import-target').append(option)}
+ const studentActions={run,request:edge,issued:text=>{$('issued-code').textContent=text},refresh:async()=>{
+  pendingImport=null;visible('secure-import-confirm',false);$('secure-import-preview').textContent='';
+  worldContentPanel?.destroy();worldContentPanel=null;visible('teacher-world-content',false);
+  missionPanel?.destroy();missionPanel=null;visible('teacher-missions',false);
+  await loadStudents();
+ }};
+ for(const s of missionStudents){
+  $('secure-students').append(TeacherStudents.card(s,studentActions));
+  if(!s.hasSave&&s.enabled){const option=document.createElement('option');option.value=s.id;option.textContent=s.displayName||s.nickname;$('import-target').append(option)}
  }
 }
 async function checkFunctions(){
@@ -93,7 +99,19 @@ for(const id of ['cancel-session','secure-logout'])$(id).addEventListener('click
 $('open-world-content').addEventListener('click',()=>run(async()=>{if(!teacherAllowed)return;await loadStudents();worldContentPanel?.destroy();visible('teacher-world-content',true);const epoch=generation,panel=await WorldContentTeacher.mount($('teacher-world-content'),{request:edge,students:missionStudents});if(epoch!==generation){panel.destroy();return}worldContentPanel=panel;}));
 $('open-missions').addEventListener('click',()=>run(async()=>{if(!teacherAllowed)return;await loadStudents();visible('teacher-missions',true);missionPanel?.destroy();missionPanel=MagicMissions.mount($('teacher-missions'),{role:'teacher',request:edge,students:missionStudents});}));
 $('reload-students').addEventListener('click',()=>run(async()=>{if(!teacherAllowed)throw new Error('Acceso no autorizado.');await loadStudents()}));
-$('new-student').addEventListener('submit',event=>{event.preventDefault();run(async()=>{if(!teacherAllowed)throw new Error('Acceso no autorizado.');const result=await edge('/students',{method:'POST',body:{nickname:$('new-nickname').value}});$('issued-code').textContent=result.student.nickname+' · código: '+result.code;$('new-nickname').value='';await loadStudents()})});
+$('new-student').addEventListener('submit',event=>{
+ event.preventDefault();
+ if(busy||!teacherAllowed)return;
+ const code=$('new-student-code').value;
+ $('new-student-code').value='';
+ $('issued-code').textContent='';
+ run(async()=>{
+  const result=await edge('/students',{method:'POST',body:{nickname:$('new-nickname').value,
+   displayName:$('new-display-name').value,...(code?{code}:{})}});
+  $('issued-code').textContent=result.code?result.student.nickname+' · código: '+result.code:'Cuenta creada con el código elegido.';
+  event.target.reset();await loadStudents();
+ });
+});
 $('new-import').addEventListener('submit',event=>{event.preventDefault();run(async()=>{pendingImport=null;visible('secure-import-confirm',false);if(!teacherAllowed)throw new Error('Acceso no autorizado.');const file=$('import-json').files[0];if(!file||file.size>350000)throw new Error('Elige un JSON de partida de menos de 350 KB.');const state=JSON.parse(await file.text()),nickname=$('import-target').selectedOptions[0]?.textContent;if($('import-nickname').value!==nickname)throw new Error('Confirma el nickname exacto de destino.');pendingImport={id:$('import-target').value,confirmNickname:nickname,state};$('secure-import-preview').textContent=JSON.stringify({destino:nickname,avatar:state.avatarName,worlds:Object.fromEntries(Object.entries(state.worlds||{}).map(([id,w])=>[id,Object.keys(w.results||{}).length]))},null,2);visible('secure-import-confirm',true)})});
 $('secure-import-confirm').addEventListener('click',()=>run(async()=>{if(!teacherAllowed||!pendingImport)return;const {id,...body}=pendingImport;await edge('/students/'+encodeURIComponent(id)+'/import',{method:'POST',body});pendingImport=null;visible('secure-import-confirm',false);$('secure-import-preview').textContent='Partida ficticia asignada sin sobrescribir otra.';await loadStudents()}));
 try{const saved=JSON.parse(localStorage.getItem(CONFIG_KEY)||'null');if(saved)config=parseConfig(saved.url,saved.key)}catch{try{localStorage.removeItem(CONFIG_KEY)}catch{}}

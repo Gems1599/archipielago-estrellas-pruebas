@@ -21,13 +21,47 @@ window.StudentAccess=(()=>{
   token=data.session;student={id:data.student.id,nickname:data.student.nickname};expiresAt=data.expiresAt;return identity();
  }
  async function logout(){const who=identity();try{if(who)await send('/logout',{method:'POST',body:{studentId:who.id},expectedStudentId:who.id})}finally{forget()}}
- function showLogin(host,onLogin,message=''){
-  host.innerHTML=`<div class="classroom-card student-login-card"><img src="assets/escenario/optimizado/castillo-central.webp" alt="Castillo mágico"><h1>Tu aventura te espera</h1><p class="classroom-note">Prueba con cuentas ficticias. Entra con el nickname y el código que te entrega tu profesora.</p><form id="student-login-form"><label>Nickname<input id="student-nickname" name="nickname" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false"></label><label>Código secreto<input id="student-code" name="code" type="password" required maxlength="128" autocomplete="off" spellcheck="false"></label><button>Entrar en mi aventura</button></form><p id="student-login-error" class="classroom-error" role="alert"></p><p><a href="profesora-supabase.html" target="_blank" rel="noopener noreferrer">Acceso privado de profesora</a></p><p class="classroom-note" data-preview-revision="avatar-tienda-r2">Avatar y Tienda · revisión 2</p><button id="student-export-old" type="button">Descargar partida local anterior</button><p class="classroom-note">Las partidas anteriores no se asignan automáticamente a ninguna cuenta.</p></div>`;
-  const form=host.querySelector('form'),error=host.querySelector('#student-login-error');error.textContent=message;
-  form.addEventListener('submit',async event=>{event.preventDefault();const button=form.querySelector('button');if(button.disabled)return;button.disabled=true;error.textContent='';const nickname=form.nickname.value.trim(),code=form.code.value;form.code.value='';try{const user=await login(nickname,code);await onLogin(user)}catch(e){error.textContent=e.message||'No se pudo conectar. Comprueba el nickname, el código y la conexión.'}finally{button.disabled=false}});
+ function showLoading(host,message){
+  host.innerHTML='<section class="everluna-loading" role="status" aria-atomic="true"><img src="assets/interfaz/moneda-estrella.svg" alt="" width="64" height="64"><h1>Everluna</h1><p></p></section>';
+  const loading=host.firstElementChild;
+  loading.querySelector('p').textContent=message;
+  loading.tabIndex=-1;
+  loading.focus({preventScroll:true});
+  return loading;
+ }
+ function showLogin(host,onLogin,message='',nickname=''){
+  host.innerHTML=`<section class="everluna-entry" aria-labelledby="everluna-title">
+   <div class="everluna-cover" aria-hidden="true">
+    <img src="assets/escenario/optimizado/castillo-central.webp" alt="" width="640" height="480">
+   </div>
+   <div class="classroom-card student-login-card">
+    <h1 id="everluna-title">Everluna</h1><p class="everluna-intro">Cinco mundos por descubrir</p>
+    <form id="student-login-form">
+     <label>Alias de acceso<input id="student-nickname" name="nickname" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+     <label>Código secreto<input id="student-code" name="code" type="password" required maxlength="128" autocomplete="current-password" spellcheck="false"></label>
+     <button>Entrar en mi aventura</button>
+    </form>
+    <p id="student-login-error" class="classroom-error" role="alert"></p>
+    <div class="everluna-entry-links">
+     <a href="profesora-supabase.html" target="_blank" rel="noopener noreferrer">Acceso privado de profesora</a>
+     <details><summary>¿Tienes una partida anterior?</summary><p class="classroom-note">Puedes descargarla para que la profesora la revise. No se asigna automáticamente a ninguna cuenta.</p><button id="student-export-old" type="button">Descargar partida local anterior</button></details>
+    </div>
+   </div>
+  </section>`;
+  const form=host.querySelector('form'),error=host.querySelector('#student-login-error');
+  form.nickname.value=nickname;error.textContent=message;
+  if(message)form.code.focus({preventScroll:true});
+  form.addEventListener('submit',async event=>{
+   event.preventDefault();
+   const alias=form.nickname.value.trim(),code=form.code.value;
+   form.code.value='';
+   const loading=showLoading(host,'Abriendo tu aventura…');
+   try{await onLogin(await login(alias,code))}
+   catch(e){if(loading.isConnected)showLogin(host,onLogin,e.message||'No se pudo conectar. Comprueba el alias, el código y la conexión.',alias)}
+  });
   host.querySelector('#student-export-old').onclick=()=>{
    try{const raw=localStorage.getItem('vera_archipelago_magica_v1')||localStorage.getItem('vera_archipelago_v1');if(!raw)throw new Error('No hay una partida anterior en este navegador.');JSON.parse(raw);const url=URL.createObjectURL(new Blob([raw],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='partida-local-para-revision.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){error.textContent=e.message}
   };
  }
- return Object.freeze({identity,login,request:send,logout,forget,showLogin});
+ return Object.freeze({identity,login,request:send,logout,forget,showLogin,showLoading});
 })();
