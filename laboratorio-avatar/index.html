@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El vestidor de Everluna</title>
+<link rel="stylesheet" href="vestidor.css">
+<script src="vestidor.js" defer></script>
+</head>
+<body>
+<header><h1>El vestidor de Everluna</h1></header>
+<main>
+<form aria-label="Personalización">
+  <label>Peinado <select id="pelo">
+    <option value="corto">Corto original</option><option value="ondas">Ondas originales</option>
+    <option value="coleta">Coleta alta</option><option value="trenzas">Dos trenzas</option>
+    <option value="rizo-corto">Corto rizado</option><option value="rizo-largo">Largo rizado</option>
+    <option value="liso">Largo liso</option><option value="coleta-baja">Coleta baja</option>
+    <option value="dos-coletas">Dos coletas</option><option value="mono">Moño alto</option>
+    <option value="flequillo-recto">Flequillo recto</option>
+  </select></label>
+  <label>Color de pelo <select id="color-pelo">
+    <option value="original">Original</option><option value="castano">Castaño oscuro</option>
+    <option value="cobre">Cobrizo</option><option value="violeta">Violeta</option>
+  </select></label>
+  <label>Tono de piel <select id="piel">
+    <option value="original">Original</option><option value="dorado">Dorado</option>
+    <option value="moreno">Moreno</option><option value="profundo">Profundo</option>
+  </select></label>
+  <label>Color de ojos <select id="ojos">
+    <option value="original">Original</option><option value="miel">Miel</option>
+    <option value="verde">Verde</option><option value="azul">Azul</option>
+  </select></label>
+  <label>Conjunto <select id="ropa">
+    <option value="basico">Cuerpo básico</option><option value="vestido">Vestido mágico</option>
+    <option value="tunica">Túnica de aprendiz</option>
+  </select></label>
+  <fieldset><legend>Accesorios</legend>
+    <label><input type="checkbox" id="sombrero"> Sombrero</label>
+    <label><input type="checkbox" id="broche"> Broche</label>
+    <label><input type="checkbox" id="pecas"> Pecas</label>
+  </fieldset>
+  <label>Fondo <select id="fondo"><option value="vestidor">Vestidor</option><option value="neutro">Neutro</option></select></label>
+  <button type="button" id="descargar">Guardar PNG transparente</button>
+  <p id="estado" role="status"></p>
+</form>
+<figure class="vestidor" id="escena">
+  <canvas id="avatar" width="1024" height="1600" role="img" aria-label="Vista previa del personaje"></canvas>
+</figure>
+</main>
+</body>
+</html>
