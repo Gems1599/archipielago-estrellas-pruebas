@@ -84,6 +84,7 @@ p{margin:.35em 0 .8em}
 <link rel="stylesheet" href="classroom.css">
 <link rel="stylesheet" href="illustrated-avatar.css">
 <link rel="stylesheet" href="magic-shop.css">
+<link rel="stylesheet" href="everluna-visual.css">
 </head>
 <body class="classroom-gate">
 <header class="header">
@@ -99,11 +100,12 @@ p{margin:.35em 0 .8em}
 <main id="app" class="everluna-app">
   <section class="everluna-loading" role="status" aria-atomic="true">
     <img src="assets/interfaz/moneda-estrella.svg" alt="" width="64" height="64">
-    <h1>Everluna</h1>
+    <h1 class="everluna-wordmark">Everluna</h1>
     <p>Abriendo el libro de aventuras…</p>
   </section>
   <noscript><p>Activa JavaScript para abrir Everluna.</p></noscript>
 </main>
+<div id="everluna-crossing" aria-hidden="true"></div>
 <div class="footer-note">Esta versión mejorada conserva las 150 preguntas y añade un mapa más ilustrado, avatar personalizable, pistas más útiles, hitos de progreso y medallas más llamativas.</div>
 <script src="avatar.js"></script>
 <script src="avatar-palette.js"></script>
@@ -165,11 +167,17 @@ function allExploration(){return WORLDS.every(w=>allDone(w.id))}
 function allPlus(){return WORLDS.every(w=>correctCount(w.id)===30)}
 function setApp(html){if(!classroomReady)return;$('app').innerHTML=html+(modal?renderModal():'')}
 function btn(label,fn,cls='soft'){return `<button class="${cls}" onclick="${fn}">${label}</button>`}
-function go(next){if(next!=='weekly-world')destroyWeeklyWorld();if(next!=='missions')destroyMagicMissions();cancelMapJourney();stopTimer();screen=next;if(next!=='question'){feedback=null;showHint=false;selection='';pairState={};classState={};paused=false;expired=false;noTime=false;recentUnlocks=[]}render();window.scrollTo({top:0,behavior:'smooth'})}
+function everlunaCrossing(){
+ const veil=$('everluna-crossing');
+ veil.getAnimations().forEach(animation=>animation.cancel());
+ if(!state.motion||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ veil.animate([{opacity:.64},{opacity:0}],{duration:440,easing:'ease-out'});
+}
+function go(next){const previous=screen;if(next!=='weekly-world')destroyWeeklyWorld();if(next!=='missions')destroyMagicMissions();cancelMapJourney();stopTimer();screen=next;if(next!=='question'){feedback=null;showHint=false;selection='';pairState={};classState={};paused=false;expired=false;noTime=false;recentUnlocks=[]}render();if(previous!==next&&[previous,next].some(view=>view==='world'||view==='weekly-world'))everlunaCrossing();window.scrollTo({top:0,behavior:state.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'})}
 function toggleMotion(){state.motion=!state.motion;document.body.classList.toggle('reduced',!state.motion);$('motionBtn').textContent='✨ Animación: '+(state.motion?'sí':'no');save()}
 function render(){document.body.classList.toggle('scene-home',screen==='home');syncWorldScene();syncMedalRoomPresentation();syncWardrobePresentation();syncStickerAlbum();syncMagicShop();if(screen==='home')renderHome();else if(screen==='world')renderWorld();else if(screen==='question')renderQuestion();else if(screen==='passport')renderPassport();else if(screen==='garden')renderGarden();else if(screen==='medals')renderMedalRoom();else if(screen==='avatar')renderAvatarScreen();else if(screen==='album')renderStickerAlbum();else if(screen==='shop')renderMagicShop();else if(screen==='missions')renderMagicMissions()}
 function continueGame(){const next=WORLDS.find(w=>st(w.id).started&&!allDone(w.id))||WORLDS.find(w=>!allDone(w.id))||WORLDS[0];openWorld(next.id)}
-function openWorld(id){if(classroomWorldContentEnabled){void openWeeklyWorld(id);return}cancelMapJourney();active=id;review=false;feedback=null;selection='';pairState={};classState={};showHint=false;paused=false;noTime=false;expired=st(id).remaining<=0;screen='world';render()}
+function openWorld(id){if(classroomWorldContentEnabled){void openWeeklyWorld(id);return}cancelMapJourney();active=id;review=false;feedback=null;selection='';pairState={};classState={};showHint=false;paused=false;noTime=false;expired=st(id).remaining<=0;screen='world';render();everlunaCrossing()}
 function showModal(title,text,icon='🌟'){modal={title,text,icon};render()}
 function closeModal(){modal=null;$('app').querySelectorAll('.modal-backdrop').forEach(el=>el.remove());render()}
 function renderModal(){return `<div class="modal-backdrop" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="burst">${modal.icon}</div><h2>${modal.title}</h2><p>${modal.text}</p><div class="actions" style="justify-content:center">${btn('Seguir','closeModal()','primary')}</div></div></div>`}

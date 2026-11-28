@@ -1,0 +1,92 @@
+@font-face{
+ font-family:"Cinzel Decorative";src:url("assets/fuentes/CinzelDecorative-Bold.ttf") format("truetype");
+ font-weight:700;font-style:normal;font-display:swap
+}
+.everluna-wordmark{
+ --everluna-gold:#ffe8a5;
+ position:relative;font-family:"Cinzel Decorative",Georgia,serif;font-weight:700;
+ color:var(--everluna-gold);text-shadow:0 2px 1px #674275,0 3px 12px #190e39,0 0 20px #ebc48162;
+ letter-spacing:.01em
+}
+.everluna-entry h1.everluna-wordmark,.everluna-loading h1.everluna-wordmark{
+ font-weight:700;font-size:clamp(34px,4.7vw,61px);letter-spacing:.01em;
+ text-shadow:0 2px 1px #92679e,0 0 21px #d0a3f17a
+}
+.scene-board .scene-heading.everluna-wordmark{font-size:clamp(36px,5.4vw,79px);top:1.1%;width:max-content;max-width:none}
+.scene-board .scene-greeting{top:calc(max(100svh,760px)*.011 + clamp(40px,5.8vw,85px));font-size:12px}
+.everluna-wordmark::after{
+ content:"";position:absolute;right:-.14em;top:.03em;width:.18em;aspect-ratio:1;
+ background:#fff3c7;clip-path:polygon(50% 0,62% 36%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 36%);
+ pointer-events:none;animation:everluna-glimmer 5s ease-in-out infinite
+}
+.scene-mist::before,.scene-mist::after,.everluna-cover::after{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(circle at 15% 23%,#ffe5a3 0 2px,transparent 3px),
+ radial-gradient(circle at 29% 12%,#eed5ff 0 1px,transparent 3px),
+ radial-gradient(circle at 43% 38%,#ffe8ac 0 1px,transparent 3px),
+ radial-gradient(circle at 65% 25%,#ffe8ac 0 2px,transparent 3px),
+ radial-gradient(circle at 78% 44%,#eed5ff 0 1px,transparent 3px),
+ radial-gradient(circle at 88% 17%,#ffe8ac 0 2px,transparent 3px);
+ opacity:.62;animation:everluna-glimmer 5.4s ease-in-out infinite
+}
+.scene-mist::after{
+ inset:9% 8%;background:radial-gradient(circle at 16% 82%,#ffe5aa 0 1px,transparent 2px),
+ radial-gradient(circle at 33% 68%,#f2cbff 0 2px,transparent 3px),
+ radial-gradient(circle at 51% 89%,#ffe5aa 0 1px,transparent 3px),
+ radial-gradient(circle at 70% 74%,#ffe5aa 0 1px,transparent 2px),
+ radial-gradient(circle at 88% 56%,#f2cbff 0 1px,transparent 2px);
+ animation:everluna-dust 11s ease-in-out infinite
+}
+.scene-board .map-traveler{width:66px;height:94.6px;pointer-events:none}
+.map-traveler:not(.is-traveling)>.storybook-avatar{animation:everluna-breathe 4.5s ease-in-out infinite;transform-origin:center 85%}
+.everluna-eyelids{position:absolute;inset:0;pointer-events:none}
+.everluna-eyelids::before,.everluna-eyelids::after{
+ content:"";position:absolute;top:14.8%;left:40.4%;width:7.4%;height:4.2%;border-radius:50%;
+ background:var(--everluna-eyelid);border-bottom:1px solid #75465b;opacity:0
+}
+.everluna-eyelids::after{left:54.3%;top:14%}
+.illustrated-girl:not(.girl-uses-layers)>.everluna-eyelids::before{left:40.8%;top:15.7%}
+.illustrated-girl:not(.girl-uses-layers)>.everluna-eyelids::after{left:53.6%;top:14.9%}
+.map-traveler .everluna-eyelids::before,.map-traveler .everluna-eyelids::after{animation:everluna-lids 6.8s linear infinite}
+.map-traveler [data-layer="eyes"]{transform-box:fill-box;transform-origin:center;animation:everluna-blink 6.8s linear infinite}
+.everluna-entry form button,.weekly-world [data-weekly],.scene-nav-action{transition:filter .18s ease}
+.everluna-entry form button:is(:hover,:focus-visible),.weekly-world [data-weekly]:not(:disabled):is(:hover,:focus-visible){filter:drop-shadow(0 0 7px #f2cf9c90)}
+.everluna-entry form button:active,.weekly-world [data-weekly]:not(:disabled):active,.scene-nav-action:active{filter:brightness(1.18) drop-shadow(0 0 8px #ffdb8d)}
+#everluna-crossing{
+ position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;
+ background:radial-gradient(ellipse at 50% 49%,#f9dc9e58 0,#d9a6e95c 32%,#30205a91 100%);
+}
+.everluna-correct{min-height:80px;display:flow-root;position:relative}
+.everluna-correct>.everluna-avatar-cheer{float:inline-end;margin:0 0 8px 10px;pointer-events:none}
+.everluna-correct>.everluna-avatar-cheer .storybook-avatar{display:block;max-width:68px;max-height:97px}
+.everluna-avatar-cheer{animation:everluna-cheer .7s ease-out both}
+.everluna-correct::after,.medal-celebration-toast::after,.sticker-celebration::after,.coin-reward-notice::after{
+ content:"";position:absolute;right:5px;top:7px;width:75px;height:64px;pointer-events:none;
+ background:radial-gradient(circle at 29% 20%,#ffe2a4 0 2px,transparent 3px),
+ radial-gradient(circle at 73% 15%,#e4b3ff 0 2px,transparent 3px),
+ radial-gradient(circle at 87% 60%,#ffe2a4 0 2px,transparent 3px),
+ radial-gradient(circle at 54% 73%,#fff5cc 0 1px,transparent 2px);
+ animation:everluna-sparks .95s ease-out both
+}
+@keyframes everluna-glimmer{0%,100%{opacity:.36}52%{opacity:.9}}
+@keyframes everluna-dust{0%,100%{transform:translateY(0);opacity:.29}50%{transform:translateY(-13px);opacity:.65}}
+@keyframes everluna-breathe{0%,100%{transform:scale(1)}50%{transform:scale(.996,1.024)}}
+@keyframes everluna-blink{0%,45%,49%,100%{transform:scaleY(1)}47%{transform:scaleY(.12)}}
+@keyframes everluna-lids{0%,45%,49%,100%{opacity:0}47%{opacity:1}}
+@keyframes everluna-cheer{0%,100%{transform:translateY(0)}38%{transform:translateY(-7px) rotate(-4deg)}72%{transform:translateY(-1px) rotate(2deg)}}
+@keyframes everluna-sparks{from{opacity:0;transform:scale(.6)}30%{opacity:1}to{opacity:0;transform:translateY(-13px) scale(1.3)}}
+@media(max-width:700px){
+ .scene-board .scene-heading.everluna-wordmark{top:88px;left:14px;font-size:clamp(27px,7vw,42px)}
+ .scene-board .scene-greeting{top:calc(96px + clamp(27px,7vw,42px));left:14px;font-size:10px}
+}
+.reduced :is(.everluna-wordmark,.scene-mist,.everluna-cover,.everluna-correct,.medal-celebration-toast,.sticker-celebration,.coin-reward-notice)::after,
+.reduced .scene-mist::before,.reduced .map-traveler .everluna-eyelids::before,.reduced .map-traveler .everluna-eyelids::after,
+.reduced .map-traveler [data-layer="eyes"],.reduced .map-traveler:not(.is-traveling)>.storybook-avatar,.reduced .everluna-avatar-cheer{animation:none}
+.reduced #everluna-crossing{display:none}
+@media(prefers-reduced-motion:reduce){
+ :is(.everluna-wordmark,.scene-mist,.everluna-cover,.everluna-correct,.medal-celebration-toast,.sticker-celebration,.coin-reward-notice)::after,
+ .scene-mist::before,.map-traveler .everluna-eyelids::before,.map-traveler .everluna-eyelids::after,.map-traveler [data-layer="eyes"],
+ .map-traveler:not(.is-traveling)>.storybook-avatar,.everluna-avatar-cheer{animation:none}
+ #everluna-crossing{display:none}
+ .everluna-entry form button,.weekly-world [data-weekly],.scene-nav-action{transition:none}
+}

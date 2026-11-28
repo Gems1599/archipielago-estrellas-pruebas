@@ -63,7 +63,7 @@ function decorateWorldQuestion(reset=true){
  const nav=document.createElement('div');nav.innerHTML=worldSceneNavigation();question.prepend(nav);
  const stage=Math.min(5,Math.floor(currentIndex()/5));
  const journey=document.createElement('div');journey.className='world-question-journey';journey.setAttribute('aria-label',`Etapa ${stage+1} de 6`);
- journey.innerHTML=`<div class="world-question-stage-stars">${Array.from({length:6},(_,i)=>`<span class="${i===stage?'question-current-stage':''}">${i+1}</span>`).join('')}</div><div id="world-question-avatar" class="world-question-avatar"><div class="world-avatar-idle">${renderAvatar(.34)}</div></div>`;
+ journey.innerHTML=`<div class="world-question-stage-stars">${Array.from({length:6},(_,i)=>`<span class="${i===stage?'question-current-stage':''}">${i+1}</span>`).join('')}</div><div id="world-question-avatar" class="world-question-avatar"><div class="world-avatar-idle ${feedback?.ok?'everluna-avatar-cheer':''}">${renderAvatar(.34)}</div></div>`;
  question.prepend(journey);
  const companion=document.createElement('div');companion.className='world-question-companion';companion.innerHTML=guardianArt(active,'welcome',125);question.append(companion);
  const label=question.querySelector('.progress-banner .label');if(label)label.textContent=review?`${SCENE_SUBJECTS[active]} · Repaso`:`${SCENE_SUBJECTS[active]} · Prueba ${Math.min(currentIndex()+1,30)} de 30`;

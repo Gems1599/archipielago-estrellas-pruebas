@@ -22,7 +22,7 @@ window.StudentAccess=(()=>{
  }
  async function logout(){const who=identity();try{if(who)await send('/logout',{method:'POST',body:{studentId:who.id},expectedStudentId:who.id})}finally{forget()}}
  function showLoading(host,message){
-  host.innerHTML='<section class="everluna-loading" role="status" aria-atomic="true"><img src="assets/interfaz/moneda-estrella.svg" alt="" width="64" height="64"><h1>Everluna</h1><p></p></section>';
+  host.innerHTML='<section class="everluna-loading" role="status" aria-atomic="true"><img src="assets/interfaz/moneda-estrella.svg" alt="" width="64" height="64"><h1 class="everluna-wordmark">Everluna</h1><p></p></section>';
   const loading=host.firstElementChild;
   loading.querySelector('p').textContent=message;
   loading.tabIndex=-1;
@@ -35,7 +35,7 @@ window.StudentAccess=(()=>{
     <img src="assets/escenario/optimizado/castillo-central.webp" alt="" width="640" height="480">
    </div>
    <div class="classroom-card student-login-card">
-    <h1 id="everluna-title">Everluna</h1><p class="everluna-intro">Cinco mundos por descubrir</p>
+    <h1 id="everluna-title" class="everluna-wordmark">Everluna</h1><p class="everluna-intro">Cinco mundos por descubrir</p>
     <form id="student-login-form">
      <label>Alias de acceso<input id="student-nickname" name="nickname" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
      <label>Código secreto<input id="student-code" name="code" type="password" required maxlength="128" autocomplete="current-password" spellcheck="false"></label>

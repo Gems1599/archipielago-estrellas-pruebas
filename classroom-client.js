@@ -40,7 +40,7 @@ async function classroomConnect(user){
   classroomWorldContentEnabled=checked.worldContentEnabled===true;prepareClassroomState(loaded.state||{});classroomUserId=user.id;classroomRevision=loaded.revision;classroomReady=true;
   if(loaded.state===null)state.avatarName=user.nickname;document.body.classList.toggle('reduced',!state.motion);document.body.classList.remove('classroom-gate');
   classroomSavedSnapshot=loaded.state===null?null:JSON.stringify(loaded.state);
-  reconcileMedalCollection('migration');reconcileStarCoins();reconcileStickers();save();render();
+  reconcileMedalCollection('migration');reconcileStarCoins();reconcileStickers();save();render();everlunaCrossing();
   const logout=document.createElement('button');logout.className='cloud-logout';logout.textContent='Cerrar sesión';logout.onclick=()=>classroomLogout();document.body.append(logout);
   classroomStatus('Partida de '+user.nickname+(classroomDirty?' · preparando guardado online':' · recuperada online'));
   if(weeklyProgressUnavailable)showModal('Progreso semanal pendiente de cargar','Abre un mundo para recuperar su recorrido guardado o vuelve a iniciar sesión para consultar todos los mundos.','🌟');
