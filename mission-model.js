@@ -48,5 +48,33 @@ function missionGrade(spec,answers={},reviews={}){
  return {rows,pending,correct:rows.filter(r=>r.score===1).length,wrong:rows.filter(r=>r.score!==null&&r.score<1).length,score:pending?null:Math.round(points/rows.length*100)/10,percent:pending?null:Math.round(points/rows.length*100)};
 }
 
+function normalizeMissionBook(missionId,pages,{publish=false}={}){
+ if(!Array.isArray(pages)||pages.length>20)throw new Error('El libro admite hasta 20 páginas.');
+ const seen=new Set(),text=(value,max)=>{
+  if(typeof value!=='string'||value.length>max)throw new Error('Revisa la longitud de los textos del libro.');
+  return value.trim();
+ };
+ const result=pages.map(page=>{
+  if(!page||!/^[-a-z0-9]{8,40}$/.test(page.id||'')||seen.has(page.id))throw new Error('Página inválida o repetida.');
+  seen.add(page.id);
+  const title=text(page.title,120),body=text(page.body,3000),image=text(page.image||'',85);
+  if(image&&(!image.startsWith(missionId+'/')||!/^[-a-f0-9]{36}\/[-a-f0-9]{36}\.(png|jpg|webp)$/.test(image)))throw new Error('La ilustración debe pertenecer a esta misión.');
+  if(publish&&(!title||!(body||image||page.question)))throw new Error('Cada página necesita un título y contenido.');
+  let question;
+  if(page.question){
+   const prompt=text(page.question.prompt,260);
+   const options=page.question.options;
+   const correct=page.question.correct;
+   if(!Array.isArray(options)||options.length<2||options.length>4||!Number.isInteger(correct)||correct<0||correct>=options.length)throw new Error('Revisa las opciones de la pregunta.');
+   const choices=options.map(option=>text(option,140));
+   if(publish&&(!prompt||choices.some(choice=>!choice)||new Set(choices).size!==choices.length))throw new Error('Completa la pregunta y escribe opciones diferentes.');
+   question={prompt,options:choices,correct};
+  }
+  return {id:page.id,title,body,image,...(question?{question}:{})};
+ });
+ if(new TextEncoder().encode(JSON.stringify(result)).length>145000)throw new Error('El libro es demasiado grande.');
+ return result;
+}
+
 globalThis.MissionModel={MISSION_WORLDS,MISSION_TYPES,normalizeMission,missionPublic,missionGrade};
 })();

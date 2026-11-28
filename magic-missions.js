@@ -12,6 +12,8 @@ function blank(){return {id:crypto.randomUUID(),revision:0,title:'',story:'',wor
 function mount(host,options){
  const {role,request,students=[],onHome=()=>{},onWallet=()=>{}}=options;
  let alive=true,epoch=0,busy=false,missions=[],draft=null,run=null,index=0,answerVersion=0,savedVersion=0,saveTimer=null,clock=null,offset=0,images={},lastMessage='',review=false,saveFlight=null;
+ const bookImageUrls=[];
+ let booksEnabled=false,book=null,bookIndex=0,bookMode='',bookChecked=false;
  const $=s=>host.querySelector(s),all=s=>[...host.querySelectorAll(s)];
  function status(message){lastMessage=message;const el=$('.mission-status');if(el)el.textContent=message}
  async function call(path,opt={}){const n=epoch;const data=await request(path,opt);if(!alive||n!==epoch)throw new Error('La vista cambió.');Object.assign(images,data.images||{});return data}
@@ -24,12 +26,12 @@ function mount(host,options){
   host.innerHTML=`<div class="mission-shell"><div class="mission-navigation">${btn(role==='teacher'?'Misiones mágicas':'Inicio','home')}<span class="mission-balance" aria-label="Monedas estrella">${options.balance?esc(options.balance())+' monedas estrella':''}</span></div><main class="mission-content">${body}</main><p class="mission-status" role="status">${esc(lastMessage)}</p></div>`;
   host.onclick=e=>{const b=e.target.closest('[data-do]');if(!b||b.disabled)return;void action(()=>dispatch(b.dataset.do,b))};
  }
- async function load(){const data=await call('/missions');missions=data.missions||[];role==='teacher'?teacherList():hub()}
+ async function load(){const data=await call('/missions');missions=data.missions||[];booksEnabled=data.booksEnabled===true;book=null;role==='teacher'?teacherList():hub()}
  function hub(){
   layout(`<header class="mission-intro">${guardian(missions[0]?.world||'math')}<div class="mission-speech"><p class="mission-kicker">Aventuras especiales</p><h1>Misiones mágicas</h1><p>Tu guardián tiene un desafío para ti. Elige tu aventura y responde con calma.</p></div></header><div class="mission-list">${missions.map(m=>`<article class="mission-scroll">${guardian(m.world)}<h2>${esc(m.title)}</h2><p>${esc(worlds[m.world])}</p><p>${esc(m.story||'')}</p><p>${m.attempts?`${m.attempts} intento${m.attempts===1?'':'s'} terminado${m.attempts===1?'':'s'}`:'Una nueva misión te espera'}</p>${btn(m.ongoing?'Continuar misión':m.attempts?'Volver a intentarlo':'Comenzar misión','start',`data-id="${m.id}"`)}${(m.history||[]).map((r,i)=>btn(`Ver intento ${i+1} · ${r.result?.score===null?'Pendiente':r.result?.score+'/10'} · ${time(r.elapsed||0)}`,'result',`data-id="${r.id}" class="mission-secondary"`)).join('')}</article>`).join('')||'<p class="mission-scroll">Todavía no tienes misiones disponibles. Cuando tu profesora te asigne una, aparecerá aquí.</p>'}</div>`);
  }
  function teacherList(){
-  layout(`<h1>Misiones mágicas</h1><p>Crea entre 1 y 40 preguntas. Solo las verán los alumnos que selecciones.</p>${btn('Crear misión','new')}<div class="mission-list">${missions.map(m=>`<article class="mission-scroll"><h2>${esc(m.title)}</h2><p>${esc(worlds[m.world])} · ${m.active?'Activa':'Inactiva'} · ${m.questions.length} preguntas · ${m.students.length} alumnos</p>${m.startAt?`<p>Disponible: ${esc(new Date(m.startAt).toLocaleString('es-ES',{timeZone:'Europe/Madrid'}))} (Madrid)</p>`:''}<div class="mission-actions">${btn('Editar','edit',`data-id="${m.id}"`)}${btn('Duplicar','duplicate',`data-id="${m.id}"`)}${btn(m.active?'Desactivar':'Activar','toggle',`data-id="${m.id}"`)}${btn('Resultados','results',`data-id="${m.id}"`)}${btn('Eliminar','archive',`data-id="${m.id}" class="mission-secondary"`)}</div></article>`).join('')}</div>`);
+  layout(`<h1>Misiones mágicas</h1><p>Crea entre 1 y 40 preguntas. Solo las verán los alumnos que selecciones.</p>${btn('Crear misión','new')}<div class="mission-list">${missions.map(m=>`<article class="mission-scroll"><h2>${esc(m.title)}</h2><p>${esc(worlds[m.world])} · ${m.active?'Activa':'Inactiva'} · ${m.questions.length} preguntas · ${m.students.length} alumnos</p>${m.startAt?`<p>Disponible: ${esc(new Date(m.startAt).toLocaleString('es-ES',{timeZone:'Europe/Madrid'}))} (Madrid)</p>`:''}<div class="mission-actions">${btn('Editar','edit',`data-id="${m.id}"`)}${booksEnabled?btn('Editar libro','book-edit',`data-id="${m.id}"`):''}${btn('Duplicar','duplicate',`data-id="${m.id}"`)}${btn(m.active?'Desactivar':'Activar','toggle',`data-id="${m.id}"`)}${btn('Resultados','results',`data-id="${m.id}"`)}${btn('Eliminar','archive',`data-id="${m.id}" class="mission-secondary"`)}</div></article>`).join('')}</div>`);
  }
  function image(path,cls=''){return path&&images[path]?`<img class="mission-question-image ${cls}" src="${esc(images[path])}" alt="Ilustración de la pregunta">`:''}
  function editor(){
@@ -80,7 +82,108 @@ function mount(host,options){
  async function results(missionId){const data=await call('/missions/results',{method:'POST',body:{missionId}});const runs=data.runs||[],group=Object.groupBy(runs,r=>r.student_id);
   layout(`<h1>Resultados de la misión</h1>${Object.values(group).map(list=>{const finished=list.filter(r=>r.finished_at),scored=finished.filter(r=>r.result?.score!==null);return `<section class="mission-scroll"><h2>${esc(list[0].nickname)}</h2><p>${finished.length} intentos terminados · Primer resultado: ${finished[0]?.result?.score??'Pendiente'} · Mejor: ${scored.length?Math.max(...scored.map(r=>r.result.score)):'Pendiente'}</p>${list.map((r,i)=>`<details><summary>Intento ${i+1} · ${r.result?.score??'Pendiente'} /10 · ${time(r.elapsed||0)} · ${esc(new Date(r.started_at).toLocaleString('es-ES'))}</summary>${r.spec.questions.map(q=>`<div class="mission-review-row"><h3>${esc(q.prompt)}</h3>${image(q.image)}<p>${esc(answerLabel(q,r.answers[q.id]||[]))||'Sin responder'}</p>${q.manual&&r.finished_at?`<label>Puntuación de esta pregunta (0 a 1)<input type="number" min="0" max="1" step="0.1" value="${r.result.rows.find(x=>x.id===q.id)?.score??''}" data-mark="${r.id}-${q.id}"></label><label>Comentario<textarea data-feedback="${r.id}-${q.id}">${esc(r.result.rows.find(x=>x.id===q.id)?.feedback||'')}</textarea></label>${btn('Guardar corrección','grade',`data-run="${r.id}" data-question="${q.id}" data-mission="${missionId}"`)}`:`<p>${q.manual?'Pendiente de entrega':'Solución: '+esc(answerLabel(q,q.correct||[]))}</p>`}</div>`).join('')}</details>`).join('')}</section>`}).join('')||'<p>Todavía no hay intentos.</p>'}${btn('Volver a misiones','list')}`);
  }
+ const bookCall=(action,payload={})=>call('/missions/book',{method:'POST',body:{missionId:book.mission.id,action,...payload}});
+ function readBookEditor(){
+  const form=$('#mission-book-editor');if(!form)return;
+  const page=book.pages[bookIndex];
+  page.title=form.elements.title.value;page.body=form.elements.explanation.value;
+  if(form.elements.hasQuestion.checked){
+   page.question={
+    prompt:form.elements.prompt.value,
+    options:[form.elements.optionA.value,form.elements.optionB.value,...(form.elements.optionD.value?[form.elements.optionC.value,form.elements.optionD.value]:form.elements.optionC.value?[form.elements.optionC.value]:[])],
+    correct:Number(form.elements.correct.value)
+   };
+   if(page.question.correct>=page.question.options.length)page.question.correct=0;
+  }else delete page.question;
+ }
+ function editBook(){
+  bookMode='edit';const page=book.pages[bookIndex],q=page?.question;
+  const toolbar=`<div class="mission-actions">${btn('Volver a misiones','list')}${btn('Añadir página','book-add',book.pages.length>=20?'disabled':'')}${btn('Guardar borrador','book-save')}${btn('Publicar libro','book-publish')}${btn('Previsualizar','book-preview',!page?'disabled':'')}</div>`;
+  layout(`<h1>Libro mágico · ${esc(book.mission.title)}</h1><p>Publicar un libro vacío retira el libro conservando la misión.</p>${toolbar}<div class="mission-book-select">${book.pages.map((item,i)=>btn((i+1)+'. '+(item.title||'Página sin título'),'book-select',`data-i="${i}" aria-pressed="${i===bookIndex}"`)).join('')}</div>${page?`
+   <form id="mission-book-editor" class="mission-editor-question"><h2>Página ${bookIndex+1}</h2>
+    <label>Título<input name="title" maxlength="120" value="${esc(page.title)}"></label>
+    <label>Explicación<textarea name="explanation" maxlength="3000">${esc(page.body)}</textarea></label>
+    ${bookPicture(page)}<label>Subir ilustración<input type="file" accept="image/png,image/jpeg,image/webp" data-book-image></label>
+    ${page.image?btn('Quitar ilustración','book-image-remove'):''}
+    <label><input type="checkbox" name="hasQuestion" ${q?'checked':''}> Incluir una pregunta de comprensión</label>
+    <fieldset data-book-question ${q?'':'hidden'}><legend>Pregunta de comprensión</legend>
+     <label>Pregunta<input name="prompt" maxlength="260" value="${esc(q?.prompt)}"></label>
+     <label>Primera opción<input name="optionA" maxlength="140" value="${esc(q?.options[0])}"></label>
+     <label>Segunda opción<input name="optionB" maxlength="140" value="${esc(q?.options[1])}"></label>
+     <label>Tercera opción (opcional)<input name="optionC" maxlength="140" value="${esc(q?.options[2])}"></label>
+     <label>Cuarta opción (opcional)<input name="optionD" maxlength="140" value="${esc(q?.options[3])}"></label>
+     <label>Opción correcta<select name="correct">${['Primera','Segunda','Tercera','Cuarta'].map((name,i)=>`<option value="${i}" ${q?.correct===i?'selected':''}>${name}</option>`).join('')}</select></label>
+    </fieldset>
+   </form><div class="mission-actions">${btn('Mover antes','book-move',`data-step="-1" ${bookIndex===0?'disabled':''}`)}
+   ${btn('Mover después','book-move',`data-step="1" ${bookIndex===book.pages.length-1?'disabled':''}`)}${btn('Eliminar página','book-remove')}</div>`:'<p>Todavía no hay páginas en el libro.</p>'}`,book.mission.world);
+  const form=$('#mission-book-editor');if(!form)return;
+  form.onsubmit=event=>event.preventDefault();
+  form.onchange=event=>{
+   if(event.target.name==='hasQuestion')form.querySelector('[data-book-question]').hidden=!event.target.checked;
+   if(event.target.matches('[data-book-image]'))void action(async()=>{
+    const file=event.target.files[0];if(!file)return;
+    if(file.size>2097152)throw new Error('La ilustración debe ocupar menos de 2 MB.');
+    readBookEditor();
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    let raw='';for(const byte of bytes)raw+=String.fromCharCode(byte);
+    const data=await call('/missions/image',{method:'POST',body:{missionId:book.mission.id,mime:file.type,data:btoa(raw)}});
+    // The uploaded image is a local preview until saved to the draft.
+    book.pages[bookIndex].image=data.path;
+    images[data.path]=URL.createObjectURL(file);bookImageUrls.push(images[data.path]);
+    editBook();
+   });
+  };
+ }
+ function bookPicture(page){
+  return page.image&&images[page.image]?`<img class="mission-book-illustration" src="${esc(images[page.image])}" alt="${esc(page.title?'Ilustración: '+page.title:'Ilustración de la página')}" decoding="async">`:'';
+ }
+ function renderBook(){
+  const page=book.pages[bookIndex],q=page.question;
+  layout(`<article class="mission-book-page"><p>Página ${bookIndex+1} de ${book.pages.length}</p><h1>${esc(page.title||'Página sin título')}</h1>
+   ${bookPicture(page)}<p class="mission-book-text">${esc(page.body)}</p>
+   ${q?`<fieldset class="mission-book-choices"><legend>${esc(q.prompt)}</legend>${q.options.map((choice,i)=>btn(choice,'book-answer',`data-i="${i}" ${bookChecked?'disabled':''}`)).join('')}</fieldset><p role="status" data-book-feedback></p>`:''}
+   <div class="mission-actions">${btn('Página anterior','book-prev',bookIndex?'':'disabled')}${btn(bookIndex===book.pages.length-1?'Terminar el libro':'Página siguiente','book-next',q&&!bookChecked?'disabled':'')}${btn(bookMode==='preview'?'Volver a editar':'Volver a misiones',bookMode==='preview'?'book-edit-back':'list')}</div>
+   </article>`,book.mission.world);
+ }
+ async function bookAction(name,b){
+  if(name==='book-edit'){
+   book={mission:missions.find(item=>item.id===b.dataset.id)};const data=await bookCall('get');
+   book.revision=data.revision;book.pages=data.draft;bookIndex=0;editBook();return;
+  }
+  if(name==='book-edit-back'){editBook();return}
+  if(bookMode==='edit'){
+   readBookEditor();
+   if(name==='book-add'){book.pages.push({id:crypto.randomUUID(),title:'',body:'',image:''});bookIndex=book.pages.length-1}
+   if(name==='book-select')bookIndex=Number(b.dataset.i);
+   if(name==='book-remove'){if(!confirm('¿Eliminar esta página del borrador?'))return;book.pages.splice(bookIndex,1);bookIndex=Math.max(0,Math.min(bookIndex,book.pages.length-1))}
+   if(name==='book-image-remove')book.pages[bookIndex].image='';
+   if(name==='book-move'){const next=bookIndex+Number(b.dataset.step);[book.pages[bookIndex],book.pages[next]]=[book.pages[next],book.pages[bookIndex]];bookIndex=next}
+   if(name==='book-preview'){bookMode='preview';bookIndex=0;bookChecked=false;renderBook();return}
+   if(name==='book-save'||name==='book-publish'){
+    if(name==='book-publish'&&!confirm('¿Publicar esta versión del libro para los alumnos asignados?'))return;
+    const data=await bookCall(name==='book-publish'?'publish':'save',{revision:book.revision,pages:book.pages});
+    book.revision=data.revision;book.pages=data.draft;
+    status(name==='book-publish'?'Versión del libro publicada.':'Borrador guardado.');
+   }
+   editBook();return;
+  }
+  if(name==='book-answer'){
+   const choice=Number(b.dataset.i),page=book.pages[bookIndex];
+   const ok=bookMode==='preview'?choice===page.question.correct:(await bookCall('check',{revision:book.revision,pageId:page.id,choice})).ok;
+   bookChecked=ok;
+   const message=ok?'¡Bien! Ya puedes continuar.':'Vuelve a leer la explicación y prueba otra vez.';
+   if(ok)renderBook();$('[data-book-feedback]').textContent=message;return;
+  }
+  if(name==='book-next'&&book.pages[bookIndex].question&&!bookChecked)return;
+  if(name==='book-next'&&bookIndex===book.pages.length-1){
+   if(bookMode==='preview'){layout('<h1>Fin de la vista previa</h1>'+btn('Volver a editar','book-edit-back'),book.mission.world);return}
+   layout(options.avatarIntro?options.avatarIntro('¡Ya tienes todo lo necesario!','Has terminado el libro. Cuando quieras, empieza el desafío.',btn('Empezar el desafío','start-now',`data-id="${book.mission.id}"`),book.mission.world):btn('Empezar el desafío','start-now',`data-id="${book.mission.id}"`),book.mission.world);
+   return;
+  }
+  bookIndex+=name==='book-prev'?-1:1;bookChecked=false;renderBook();
+ }
  async function dispatch(action,b){
+  if(action.startsWith('book-')){await bookAction(action,b);return}
   if(action==='home'){await persist();if(role==='teacher')await load();else onHome();return}
   if(action==='list'||action==='cancel'){draft=null;await load();return}
   if(action==='new'){draft=blank();editor();return}
@@ -108,11 +211,21 @@ function mount(host,options){
     return;
    }
   }
-  if(action==='start'||action==='start-confirm'){await openRun(await call('/missions/start',{method:'POST',body:{missionId:b.dataset.id}}));return}
+  if(booksEnabled&&(action==='start-confirm'||action==='start')){
+   const mission=missions.find(item=>item.id===b.dataset.id);
+   if(mission&&!mission.ongoing){
+    book={mission};const data=await bookCall('get');
+    if(data.pages.length){book={mission,pages:data.pages,revision:data.revision};bookMode='student';bookIndex=0;bookChecked=false;renderBook();return}
+   }
+  }
+  if(action==='start'||action==='start-confirm'||action==='start-now'){await openRun(await call('/missions/start',{method:'POST',body:{missionId:b.dataset.id}}));return}
   if(action==='result'){await openRun(await call('/missions/get',{method:'POST',body:{runId:b.dataset.id}}));return}
   if(action==='grade'){const key=b.dataset.run+'-'+b.dataset.question,raw=$(`[data-mark="${key}"]`).value;if(raw==='')throw new Error('Indica una puntuación entre 0 y 1.');await call('/missions/review',{method:'POST',body:{runId:b.dataset.run,questionId:b.dataset.question,score:Number(raw),feedback:$(`[data-feedback="${key}"]`).value}});await results(b.dataset.mission);return}
   if(action==='review'){review=!review;resultView();return}
-  if(action==='retry'){await openRun(await call('/missions/start',{method:'POST',body:{missionId:run.mission_id}}));return}
+  if(action==='retry'){
+   if(booksEnabled){await dispatch('start',{dataset:{id:run.mission_id}});return}
+   await openRun(await call('/missions/start',{method:'POST',body:{missionId:run.mission_id}}));return;
+  }
   if(['order-up','order-down','confirm-order'].includes(action)){const q=run.spec.questions[index],a=[...(run.answers[q.id]?.length?run.answers[q.id]:[...q.options].reverse().map(o=>o.id))];if(action!=='confirm-order'){const i=Number(b.dataset.i),j=i+(action==='order-up'?-1:1);[a[i],a[j]]=[a[j],a[i]]}setAnswer(a);runView();return}
   await persist();if(run?.finished_at)return;
   if(action==='previous'){index--;runView()}if(action==='next'){index++;runView()}if(action==='goto'){index=Number(b.dataset.i);runView()}if(action==='back')runView();if(action==='check')checkView();
@@ -121,7 +234,7 @@ function mount(host,options){
  }
  const unload=e=>{if(answerVersion!==savedVersion&&run&&!run.finished_at){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',unload);
  layout('<h1>Misiones mágicas</h1><p>Buscando tus aventuras…</p>');void action(load);
- return {flush:persist,destroy(){window.removeEventListener('beforeunload',unload);alive=false;epoch++;clearInterval(clock);clearTimeout(saveTimer);host.onclick=host.oninput=host.onchange=null},reload:()=>action(load)};
+ return {flush:persist,destroy(){bookImageUrls.forEach(url=>URL.revokeObjectURL(url));window.removeEventListener('beforeunload',unload);alive=false;epoch++;clearInterval(clock);clearTimeout(saveTimer);host.onclick=host.oninput=host.onchange=null},reload:()=>action(load)};
 }
 globalThis.MagicMissions=Object.freeze({mount,guardian,blank});
 })();
