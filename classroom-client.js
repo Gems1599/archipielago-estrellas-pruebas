@@ -3,6 +3,7 @@
 let classroomUserId=null,classroomRevision=0,classroomReady=false,classroomFailed=false,classroomTimer=null,classroomBusy=false,classroomDirty=false,classroomEpoch=0,classroomSavedSnapshot=null,classroomPendingSave=null;
 function classroomStatus(message,error=false){let el=document.getElementById('cloud-status');if(!el){el=document.createElement('div');el.id='cloud-status';el.setAttribute('role','status');document.body.append(el)}el.className='cloud-status'+(error?' cloud-error':'');el.textContent=message}
 function classroomResetView(){
+ avatarSetupActive=false;
  destroyWeeklyWorld();classroomWorldContentEnabled=false;weeklyProgressByWorld.clear();
  destroyMagicMissions();resetStickerCelebrations();resetMedalCelebrations();
  resetMagicShop();
@@ -38,7 +39,10 @@ async function classroomConnect(user){
    }
   }
   classroomWorldContentEnabled=checked.worldContentEnabled===true;prepareClassroomState(loaded.state||{});classroomUserId=user.id;classroomRevision=loaded.revision;classroomReady=true;
-  if(loaded.state===null)state.avatarName=user.nickname;document.body.classList.toggle('reduced',!state.motion);document.body.classList.remove('classroom-gate');
+  if(loaded.state===null){state.avatarName=user.nickname;state.avatarSetupV1='pending'}
+  avatarSetupActive=state.avatarSetupV1==='pending';
+  if(avatarSetupActive)screen='avatar';
+ document.body.classList.toggle('reduced',!state.motion);document.body.classList.remove('classroom-gate');
   classroomSavedSnapshot=loaded.state===null?null:JSON.stringify(loaded.state);
   reconcileMedalCollection('migration');reconcileStarCoins();reconcileStickers();save();render();everlunaCrossing();
   const logout=document.createElement('button');logout.className='cloud-logout';logout.textContent='Cerrar sesión';logout.onclick=()=>classroomLogout();document.body.append(logout);

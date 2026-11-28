@@ -15,7 +15,7 @@ async function missionGameRequest(path,options={}){
 function missionGameWallet(wallet){if(!wallet||!Number.isSafeInteger(wallet.balance)||wallet.balance<0)return;state.futureFeatures.currency=structuredClone(wallet);document.querySelectorAll('.scene-coin-value').forEach(e=>e.textContent=String(wallet.balance))}
 function renderMagicMissions(){
  magicMissionView?.destroy();document.body.classList.add('in-missions');setApp('<section id="mission-game-host"></section>');
- magicMissionView=MagicMissions.mount(document.getElementById('mission-game-host'),{role:'student',request:missionGameRequest,onHome:()=>go('home'),balance:()=>starCoinStatus().balance,onWallet:missionGameWallet});
+ magicMissionView=MagicMissions.mount(document.getElementById('mission-game-host'),{role:'student',request:missionGameRequest,onHome:()=>go('home'),balance:()=>starCoinStatus().balance,onWallet:missionGameWallet,avatarIntro:adventureIntro,avatarArt:()=>renderAvatar(.48)});
 }
 async function announceMagicMissions(){
  const epoch=++magicMissionNoticeEpoch,owner=classroomUserId;
